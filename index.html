@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>واژه‌نامه</title>
+<meta name="description" content="دفترچه واژگان شخصی برای ثبت و جست‌وجوی معادل‌ها">
+<style>
+:root{
+  --bg: #12213A;
+  --bg-deep: #0B1626;
+  --panel: #1A2E4C;
+  --panel-hover: #1F3557;
+  --input-bg: #0E1C31;
+  --gold: #C9A227;
+  --gold-soft: #8B7530;
+  --gold-glow: rgba(201,162,39,0.18);
+  --ink-red: #A24B4B;
+  --text: #EDE6D6;
+  --text-muted: #93A2B8;
+  --border: rgba(201,162,39,0.22);
+  --radius: 14px;
+}
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  background: radial-gradient(ellipse at top, #172946 0%, var(--bg-deep) 70%);
+  color: var(--text);
+  font-family: Tahoma, 'Segoe UI', Vazirmatn, sans-serif;
+  min-height: 100vh;
+  padding: 20px 14px 90px;
+  direction: rtl;
+}
+.wrap{ max-width: 640px; margin: 0 auto; }
+
+/* ---------- header ---------- */
+header{ text-align:center; padding: 8px 0 6px; }
+h1{
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+h1 span{ color: var(--gold); }
+.subtitle{
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+.ornament{ display:flex; align-items:center; justify-content:center; gap:10px; margin: 16px 0 20px; opacity:0.85; }
+.ornament svg{ display:block; }
+.ornament .line{ flex:1; height:1px; background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent); }
+
+/* ---------- controls ---------- */
+.controls{ display:flex; gap:8px; margin-bottom: 14px; }
+.search-box{
+  flex:1; position:relative;
+}
+.search-box input{
+  width:100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family:inherit;
+  font-size:15px;
+  padding: 12px 40px 12px 14px;
+  outline:none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-box input:focus{
+  border-color: var(--gold-soft);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+.search-box .icon{
+  position:absolute; right:13px; top:50%; transform:translateY(-50%);
+  color: var(--text-muted); pointer-events:none;
+}
+.icon-btn{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  width: 44px; height: 44px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  flex-shrink:0;
+  transition: background .15s, color .15s, transform .1s;
+}
+.icon-btn:hover{ background: var(--panel-hover); color: var(--gold); }
+.icon-btn:active{ transform: scale(0.94); }
+
+.meta-row{
+  display:flex; justify-content:space-between; align-items:center;
+  color: var(--text-muted); font-size:12.5px; margin-bottom:14px; padding: 0 2px;
+}
+.meta-row button{
+  background:none; border:none; color: var(--gold-soft); font-family:inherit;
+  font-size:12.5px; cursor:pointer; padding:0;
+}
+
+.backup-banner{
+  display:none;
+  align-items:center; justify-content:space-between; gap:10px;
+  background: rgba(162,75,75,0.12);
+  border: 1px solid rgba(162,75,75,0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+  color: #E0B8B8;
+}
+.backup-banner.show{ display:flex; animation: fadein .2s ease; }
+.backup-banner button{
+  background: var(--ink-red);
+  color: #FBEAEA;
+  border:none; border-radius:8px;
+  padding: 6px 12px;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+/* ---------- add form ---------- */
+.add-panel{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 18px;
+  display:none;
+}
+.add-panel.open{ display:block; animation: fadein .18s ease; }
+@keyframes fadein{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+.add-panel h3{ margin:0 0 12px; font-size:14px; color:var(--gold); font-weight:700; }
+.field{ margin-bottom: 10px; }
+.field label{ display:block; font-size:12px; color: var(--text-muted); margin-bottom:5px; }
+.field input, .field textarea{
+  width:100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family:inherit;
+  font-size:14.5px;
+  padding: 10px 12px;
+  outline:none;
+  resize: vertical;
+}
+.field textarea{ min-height:54px; }
+.field input:focus, .field textarea:focus{ border-color: var(--gold-soft); }
+.form-actions{ display:flex; gap:8px; margin-top:12px; }
+.btn{
+  border:none; border-radius:10px; padding:10px 16px; font-family:inherit;
+  font-size:13.5px; font-weight:600; cursor:pointer; transition: opacity .15s, transform .1s;
+}
+.btn:active{ transform: scale(0.97); }
+.btn-primary{ background: var(--gold); color: #1A1200; flex:1; }
+.btn-primary:hover{ opacity:0.9; }
+.btn-secondary{ background: transparent; color: var(--text-muted); border:1px solid var(--border); }
+
+/* ---------- entries ---------- */
+#list{ display:flex; flex-direction:column; gap:10px; }
+.card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: background .15s;
+}
+.card:active{ background: var(--panel-hover); }
+.card-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.words{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; min-width:0; }
+.original{
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: line-through;
+  text-decoration-color: rgba(147,162,184,0.4);
+  text-decoration-thickness: 1px;
+}
+.arrow{ color: var(--gold-soft); font-size:13px; }
+.equivalent{ color: var(--gold); font-size: 18px; font-weight: 700; }
+.card-actions{ display:flex; gap:4px; flex-shrink:0; }
+.mini-btn{
+  background:none; border:none; color: var(--text-muted); cursor:pointer;
+  padding: 4px; display:flex; align-items:center; border-radius:6px;
+}
+.mini-btn:hover{ color: var(--gold); }
+.mini-btn.danger:hover{ color: var(--ink-red); }
+.note{
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.empty{
+  text-align:center;
+  padding: 50px 20px;
+  color: var(--text-muted);
+}
+.empty .glyph{ font-size:30px; margin-bottom:12px; color: var(--gold-soft); }
+.empty p{ font-size:14px; line-height:1.8; margin:0; }
+
+.loading{ text-align:center; padding:40px; color: var(--text-muted); font-size:13px; }
+
+/* ---------- fab ---------- */
+.fab{
+  position: fixed;
+  bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: var(--gold);
+  color:#1A1200;
+  border:none;
+  border-radius: 999px;
+  padding: 13px 26px;
+  font-family:inherit;
+  font-size:14.5px;
+  font-weight:700;
+  display:flex; align-items:center; gap:8px;
+  cursor:pointer;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,162,39,0.3);
+  z-index: 20;
+  transition: transform .12s, opacity .15s;
+}
+.fab:active{ transform: translateX(-50%) scale(0.96); }
+.fab.hidden{ display:none; }
+
+.toast{
+  position: fixed; bottom: 90px; left:50%; transform: translateX(-50%);
+  background: var(--panel); border:1px solid var(--border); color: var(--text);
+  padding: 9px 18px; border-radius: 10px; font-size: 13px;
+  opacity:0; pointer-events:none; transition: opacity .2s, transform .2s;
+  z-index: 30;
+}
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(-6px); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>واژه‌<span>نامه</span>ی من</h1>
+    <div class="subtitle">دفترچه واژگان شخصی</div>
+  </header>
+
+  <div class="ornament">
+    <span class="line"></span>
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M11 1 L13 9 L21 11 L13 13 L11 21 L9 13 L1 11 L9 9 Z" stroke="#C9A227" stroke-width="1" fill="none" opacity="0.9"/>
+      <circle cx="11" cy="11" r="2" fill="#C9A227" opacity="0.8"/>
+    </svg>
+    <span class="line"></span>
+  </div>
+
+  <div class="controls">
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="جست‌وجوی واژه…" autocomplete="off">
+      <span class="icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+    </div>
+    <button class="icon-btn" id="sortBtn" title="ترتیب">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <button class="icon-btn" id="exportBtn" title="خروجی متنی">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="meta-row">
+    <span id="countLabel">—</span>
+    <span id="sortLabel"></span>
+  </div>
+
+  <div class="backup-banner" id="backupBanner">
+    <span>⚠ مدتیه پشتیبان نگرفتی — بهتره یه خروجی متنی بگیری</span>
+    <button id="backupNowBtn">حالا بگیر</button>
+  </div>
+
+  <div class="add-panel" id="addPanel">
+    <h3 id="formTitle">افزودن واژه‌ی تازه</h3>
+    <div class="field">
+      <label>واژه‌ی رایج / بیگانه</label>
+      <input id="inpOriginal" type="text" placeholder="مثلاً: تاریخ">
+    </div>
+    <div class="field">
+      <label>معادل پارسی</label>
+      <input id="inpEquivalent" type="text" placeholder="مثلاً: زَروان یا گاه‌شمار">
+    </div>
+    <div class="field">
+      <label>یادداشت پژوهشی (اختیاری)</label>
+      <textarea id="inpNote" placeholder="دلیل انتخاب، ریشه، یا نکته‌ای که باید به‌خاطر بسپاری…"></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="saveBtn">ذخیره</button>
+      <button class="btn btn-secondary" id="cancelBtn">انصراف</button>
+    </div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<button class="fab" id="fab">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+  واژه‌ی تازه
+</button>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'glossary:entries';
+const BACKUP_COUNT_KEY = 'glossary:lastBackupCount';
+const BACKUP_THRESHOLD = 5;
+let entries = [];
+let editingId = null;
+let sortMode = 'alpha'; // 'alpha' | 'recent'
+let loaded = false;
+
+const listEl = document.getElementById('list');
+const searchInput = document.getElementById('searchInput');
+const addPanel = document.getElementById('addPanel');
+const fab = document.getElementById('fab');
+const countLabel = document.getElementById('countLabel');
+const sortLabel = document.getElementById('sortLabel');
+const toast = document.getElementById('toast');
+const backupBanner = document.getElementById('backupBanner');
+
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(()=> toast.classList.remove('show'), 1800);
+}
+
+async function loadEntries(){
+  listEl.innerHTML = '<div class="loading">در حال بارگذاری…</div>';
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    entries = [];
+  }
+  loaded = true;
+  checkBackupReminder();
+  render();
+}
+
+async function persist(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }catch(e){
+    showToast('خطا در ذخیره‌سازی');
+  }
+}
+
+function getLastBackupCount(){
+  const raw = localStorage.getItem(BACKUP_COUNT_KEY);
+  const n = raw ? parseInt(raw, 10) : 0;
+  return isNaN(n) ? 0 : n;
+}
+
+function checkBackupReminder(){
+  const lastCount = getLastBackupCount();
+  const diff = entries.length - lastCount;
+  if(diff >= BACKUP_THRESHOLD){
+    backupBanner.classList.add('show');
+  } else {
+    backupBanner.classList.remove('show');
+  }
+}
+
+function normalize(str){ return (str||'').toLowerCase().trim(); }
+
+function getFiltered(){
+  const q = normalize(searchInput.value);
+  let list = entries.filter(e =>
+    !q || normalize(e.original).includes(q) || normalize(e.equivalent).includes(q) || normalize(e.note).includes(q)
+  );
+  if(sortMode === 'alpha'){
+    list = list.slice().sort((a,b)=> (a.equivalent||'').localeCompare(b.equivalent||'', 'fa'));
+  } else {
+    list = list.slice().sort((a,b)=> b.createdAt - a.createdAt);
+  }
+  return list;
+}
+
+function render(){
+  if(!loaded) return;
+  const filtered = getFiltered();
+  countLabel.textContent = entries.length ? `${entries.length} واژه ثبت شده` : '';
+  sortLabel.textContent = sortMode === 'alpha' ? 'ترتیب الفبایی' : 'جدیدترین‌ها';
+
+  if(entries.length === 0){
+    listEl.innerHTML = `
+      <div class="empty">
+        <div class="glyph">✦</div>
+        <p>هنوز واژه‌ای ثبت نشده.<br>با دکمه‌ی «واژه‌ی تازه» نخستین معادل خود را بیفزا.</p>
+      </div>`;
+    return;
+  }
+  if(filtered.length === 0){
+    listEl.innerHTML = `<div class="empty"><p>واژه‌ای با این جست‌وجو یافت نشد.</p></div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(e => `
+    <div class="card" data-id="${e.id}">
+      <div class="card-top">
+        <div class="words">
+          <span class="original">${escapeHtml(e.original)}</span>
+          <span class="arrow">←</span>
+          <span class="equivalent">${escapeHtml(e.equivalent)}</span>
+        </div>
+        <div class="card-actions">
+          <button class="mini-btn edit-btn" title="ویرایش">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="mini-btn danger del-btn" title="حذف">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+      ${e.note ? `<div class="note">${escapeHtml(e.note)}</div>` : ''}
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('.edit-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const id = ev.target.closest('.card').dataset.id;
+      openEdit(id);
+    });
+  });
+  listEl.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const id = ev.target.closest('.card').dataset.id;
+      deleteEntry(id);
+    });
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function openAdd(){
+  editingId = null;
+  document.getElementById('formTitle').textContent = 'افزودن واژه‌ی تازه';
+  document.getElementById('inpOriginal').value = '';
+  document.getElementById('inpEquivalent').value = '';
+  document.getElementById('inpNote').value = '';
+  addPanel.classList.add('open');
+  fab.classList.add('hidden');
+  document.getElementById('inpOriginal').focus();
+}
+
+function openEdit(id){
+  const e = entries.find(x=>x.id===id);
+  if(!e) return;
+  editingId = id;
+  document.getElementById('formTitle').textContent = 'ویرایش واژه';
+  document.getElementById('inpOriginal').value = e.original;
+  document.getElementById('inpEquivalent').value = e.equivalent;
+  document.getElementById('inpNote').value = e.note || '';
+  addPanel.classList.add('open');
+  fab.classList.add('hidden');
+  addPanel.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function closeForm(){
+  addPanel.classList.remove('open');
+  fab.classList.remove('hidden');
+  editingId = null;
+}
+
+async function saveEntry(){
+  const original = document.getElementById('inpOriginal').value.trim();
+  const equivalent = document.getElementById('inpEquivalent').value.trim();
+  const note = document.getElementById('inpNote').value.trim();
+  if(!original || !equivalent){
+    showToast('واژه و معادل الزامی‌ست');
+    return;
+  }
+  if(editingId){
+    const e = entries.find(x=>x.id===editingId);
+    e.original = original; e.equivalent = equivalent; e.note = note;
+  } else {
+    entries.push({ id: 'w_'+Date.now()+'_'+Math.random().toString(36).slice(2,7), original, equivalent, note, createdAt: Date.now() });
+  }
+  closeForm();
+  render();
+  await persist();
+  checkBackupReminder();
+  showToast('ذخیره شد');
+}
+
+async function deleteEntry(id){
+  entries = entries.filter(e=>e.id!==id);
+  render();
+  await persist();
+  showToast('حذف شد');
+}
+
+function exportText(){
+  if(entries.length === 0){ showToast('واژه‌نامه خالی است'); return; }
+  const sorted = entries.slice().sort((a,b)=> (a.equivalent||'').localeCompare(b.equivalent||'', 'fa'));
+  let out = 'واژه‌نامه‌ی ترجمه\n' + '='.repeat(20) + '\n\n';
+  sorted.forEach(e=>{
+    out += `${e.original} ← ${e.equivalent}\n`;
+    if(e.note) out += `  ${e.note}\n`;
+    out += '\n';
+  });
+  const blob = new Blob([out], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'vajeh-nameh.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  localStorage.setItem(BACKUP_COUNT_KEY, String(entries.length));
+  backupBanner.classList.remove('show');
+  showToast('خروجی دریافت شد');
+}
+
+fab.addEventListener('click', openAdd);
+document.getElementById('cancelBtn').addEventListener('click', closeForm);
+document.getElementById('saveBtn').addEventListener('click', saveEntry);
+document.getElementById('exportBtn').addEventListener('click', exportText);
+document.getElementById('backupNowBtn').addEventListener('click', exportText);
+document.getElementById('sortBtn').addEventListener('click', ()=>{
+  sortMode = sortMode === 'alpha' ? 'recent' : 'alpha';
+  render();
+});
+searchInput.addEventListener('input', render);
+
+loadEntries();
+</script>
+</body>
+</html>
