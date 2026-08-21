@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی من</title>
+  <title>واژه‌نامه‌ی من — نسخهٔ اصلاح‌شده</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -99,10 +99,22 @@
     }
     .status.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .status.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .debug-bar {
+      background: #ffeb3b;
+      color: #000;
+      padding: 8px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="debug-bar">
+      اگر این نوار زرد را می‌بینی، یعنی کد لود شده است.
+    </div>
+
     <header>
       <h1>واژه‌نامه‌ی من</h1>
       <div id="authBar" class="row">
@@ -146,6 +158,9 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    // لاگ ساده برای اطمینان از لود شدن
+    console.log("Supabase client created:", SUPABASE_URL);
+
     // ===== المان‌ها =====
     const loginCard = document.getElementById("loginCard");
     const appCard = document.getElementById("appCard");
@@ -171,19 +186,24 @@
       el.textContent = msg;
       el.classList.remove("ok", "err", "hidden");
       el.classList.add(ok ? "ok" : "err");
-      setTimeout(() => el.classList.add("hidden"), 4000);
+      setTimeout(() => el.classList.add("hidden"), 5000);
     }
 
     // ===== Auth =====
     async function refreshSession() {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) {
+          showLogin();
+          return;
+        }
+        currentUser = session.user;
+        showApp();
+        loadEntries();
+      } catch (e) {
+        console.error("getSession error:", e);
         showLogin();
-        return;
       }
-      currentUser = session.user;
-      showApp();
-      loadEntries();
     }
 
     function showLogin() {
@@ -208,15 +228,20 @@
         showStatus(loginStatus, "ایمیل و رمز را وارد کن.", false);
         return;
       }
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error || !data?.user) {
-        const msg = "ورود ناموفق:\n" + (error?.message || "خطای ناشناخته");
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error || !data?.user) {
+          const msg = "ورود ناموفق:\n" + (error?.message || "خطای ناشناخته");
+          showStatus(loginStatus, msg, false);
+          return;
+        }
+        currentUser = data.user;
+        showApp();
+        loadEntries();
+      } catch (e) {
+        const msg = "خطا در ورود:\n" + (e?.message || "خطای ناشناخته");
         showStatus(loginStatus, msg, false);
-        return;
       }
-      currentUser = data.user;
-      showApp();
-      loadEntries();
     });
 
     btnLogout.addEventListener("click", async () => {
