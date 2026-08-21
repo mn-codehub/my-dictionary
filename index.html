@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی من — نسخهٔ اصلاح‌شده</title>
+  <title>واژه‌نامه‌ی من — نسخهٔ دیباگ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -107,6 +107,18 @@
       margin: 10px 0;
       font-size: 14px;
     }
+    .log-box {
+      background: #111827;
+      color: #e5e7eb;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono, Menlo, Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      max-height: 220px;
+      overflow: auto;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -147,6 +159,13 @@
       <h2 style="margin:16px 0 8px 0; font-size:16px;">واژه‌های من</h2>
       <div id="entriesList"></div>
     </section>
+
+    <!-- لاگ‌باکس دیباگ -->
+    <section class="card">
+      <h2 style="margin:0 0 8px 0; font-size:16px;">لاگ‌های دیباگ</h2>
+      <div class="muted">هر اتفاقی در جاوااسکریپت بیفتد، اینجا نوشته می‌شود.</div>
+      <div id="logBox" class="log-box"></div>
+    </section>
   </div>
 
   <!-- Supabase (CDN) -->
@@ -158,8 +177,19 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // لاگ ساده برای اطمینان از لود شدن
-    console.log("Supabase client created:", SUPABASE_URL);
+    // ===== لاگر ساده =====
+    const logBox = document.getElementById("logBox");
+    function log(msg, type = "info") {
+      const time = new Date().toLocaleTimeString();
+      const prefix = type === "error" ? "[ERROR]" : type === "warn" ? "[WARN]" : "[INFO]";
+      const line = `${prefix} ${time} — ${msg}\n`;
+      logBox.textContent += line;
+      logBox.scrollTop = logBox.scrollHeight;
+      console.log(line);
+    }
+
+    log("شروع اسکریپت…");
+    log("Supabase URL: " + SUPABASE_URL);
 
     // ===== المان‌ها =====
     const loginCard = document.getElementById("loginCard");
@@ -186,22 +216,30 @@
       el.textContent = msg;
       el.classList.remove("ok", "err", "hidden");
       el.classList.add(ok ? "ok" : "err");
-      setTimeout(() => el.classList.add("hidden"), 5000);
+      setTimeout(() => el.classList.add("hidden"), 8000);
     }
 
     // ===== Auth =====
     async function refreshSession() {
       try {
+        log("در حال بررسی session…");
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error || !session) {
+        if (error) {
+          log("خطا در getSession: " + error.message, "error");
+          showLogin();
+          return;
+        }
+        if (!session) {
+          log("هیچ session فعالی یافت نشد.", "warn");
           showLogin();
           return;
         }
         currentUser = session.user;
+        log("کاربر لاگین‌شده: " + (currentUser?.email || "ناشناس"));
         showApp();
         loadEntries();
       } catch (e) {
-        console.error("getSession error:", e);
+        log("خطای کلی در refreshSession: " + (e?.message || e), "error");
         showLogin();
       }
     }
@@ -221,30 +259,49 @@
     }
 
     btnLogin.addEventListener("click", async () => {
+      log("دکمهٔ ورود فشرده شد.");
       loginStatus.classList.add("hidden");
       const email = emailIn.value.trim();
       const password = passIn.value;
       if (!email || !password) {
-        showStatus(loginStatus, "ایمیل و رمز را وارد کن.", false);
+        const msg = "ایمیل و رمز را وارد کن.";
+        log(msg, "warn");
+        showStatus(loginStatus, msg, false);
         return;
       }
+
+      log("در حال تلاش برای signInWithPassword با ایمیل: " + email);
+
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error || !data?.user) {
-          const msg = "ورود ناموفق:\n" + (error?.message || "خطای ناشناخته");
+
+        if (error) {
+          const msg = "ورود ناموفق:\n" + error.message;
+          log("خطای signInWithPassword: " + error.message, "error");
           showStatus(loginStatus, msg, false);
           return;
         }
+
+        if (!data?.user) {
+          const msg = "ورود ناموفق:\nکاربری یافت نشد.";
+          log("signInWithPassword: کاربری بازنگشت.", "error");
+          showStatus(loginStatus, msg, false);
+          return;
+        }
+
         currentUser = data.user;
+        log("ورود موفق؛ کاربر: " + currentUser.email);
         showApp();
         loadEntries();
       } catch (e) {
         const msg = "خطا در ورود:\n" + (e?.message || "خطای ناشناخته");
+        log("خطای کلی در btnLogin: " + (e?.message || e), "error");
         showStatus(loginStatus, msg, false);
       }
     });
 
     btnLogout.addEventListener("click", async () => {
+      log("دکمهٔ خروج فشرده شد.");
       await supabase.auth.signOut();
       showLogin();
       entriesList.innerHTML = "";
@@ -252,7 +309,11 @@
 
     // ===== CRUD واژه‌ها =====
     async function loadEntries() {
-      if (!currentUser) return;
+      if (!currentUser) {
+        log("loadEntries: کاربری لاگین نیست.", "warn");
+        return;
+      }
+      log("در حال بارگذاری واژه‌ها برای کاربر: " + currentUser.id);
       const { data, error } = await supabase
         .from("entries")
         .select("*")
@@ -260,9 +321,11 @@
         .order("created_at", { ascending: false });
 
       if (error) {
+        log("خطا در loadEntries: " + error.message, "error");
         showStatus(appStatus, "خطا در بارگذاری:\n" + error.message, false);
         return;
       }
+      log("تعداد واژه‌های بارگذاری‌شده: " + (data?.length || 0));
       renderEntries(data || []);
     }
 
@@ -318,12 +381,14 @@
         showStatus(appStatus, "حداقل یکی از فیلدها را پر کن.", false);
         return;
       }
+      log("در حال افزودن واژه: " + JSON.stringify({ term, definition }));
       const { error } = await supabase.from("entries").insert({
         user_id: currentUser.id,
         term,
         definition
       });
       if (error) {
+        log("خطا در addEntry: " + error.message, "error");
         showStatus(appStatus, "خطا در افزودن:\n" + error.message, false);
         return;
       }
@@ -341,6 +406,7 @@
 
       supabase.from("entries").update({ term: newTerm, definition: newDef }).eq("id", row.id).then(({ error }) => {
         if (error) {
+          log("خطا در ویرایش: " + error.message, "error");
           showStatus(appStatus, "خطا در ویرایش:\n" + error.message, false);
           return;
         }
@@ -351,8 +417,10 @@
 
     async function deleteEntry(id) {
       if (!confirm("آیا مطمئنی؟")) return;
+      log("در حال حذف واژه با id: " + id);
       const { error } = await supabase.from("entries").delete().eq("id", id);
       if (error) {
+        log("خطا در حذف: " + error.message, "error");
         showStatus(appStatus, "خطا در حذف:\n" + error.message, false);
         return;
       }
@@ -363,6 +431,7 @@
     btnAdd.addEventListener("click", addEntry);
 
     // ===== شروع =====
+    log("فراخوانی refreshSession…");
     refreshSession();
   </script>
 </body>
