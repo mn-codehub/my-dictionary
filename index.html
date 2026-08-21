@@ -2,25 +2,27 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی من — نسخهٔ دیباگ ۲</title>
+  <title>واژه‌نامه‌ی من — نسخهٔ نهایی</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --bg: #f7f7fb;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --primary: #2563eb;
-      --danger: #dc2626;
-      --border: #e5e7eb;
+      --bg: #0b1021;
+      --card: #121a33;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #fbbf24;     /* طلایی */
+      --primary-2: #d1d5db;   /* نقره‌ای */
+      --border: #1f2937;
+      --shadow: 0 10px 25px rgba(0,0,0,0.35);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Tahoma, Arial, sans-serif;
-      background: var(--bg);
+      background: radial-gradient(120deg, #0b1021 0%, #0f1736 100%);
       color: var(--text);
       line-height: 1.5;
+      min-height: 100vh;
     }
     .container {
       max-width: 720px;
@@ -37,13 +39,15 @@
     h1 {
       font-size: 20px;
       margin: 0;
+      color: #f3f4f6;
     }
     .card {
-      background: var(--card);
+      background: linear-gradient(180deg, #121a33 0%, #0f162b 100%);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 16px;
       margin-bottom: 16px;
+      box-shadow: var(--shadow);
     }
     .row {
       display: flex;
@@ -54,26 +58,29 @@
     input, textarea, button {
       font-size: 14px;
       padding: 8px 10px;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid var(--border);
-      background: #fff;
+      background: #0b1226;
       color: var(--text);
+    }
+    input::placeholder, textarea::placeholder {
+      color: #6b7280;
     }
     input, textarea { width: 100%; }
     textarea { min-height: 80px; resize: vertical; }
     button {
-      background: var(--primary);
-      color: #fff;
+      background: linear-gradient(180deg, #fbbf24 0%, #b45309 100%);
+      color: #111827;
       border: none;
       cursor: pointer;
+      font-weight: 600;
     }
     button.secondary {
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #d1d5db 0%, #6b7280 100%);
+      color: #111827;
     }
     button.danger {
-      background: var(--danger);
+      background: linear-gradient(180deg, #f87171 0%, #b91c1c 100%);
     }
     .muted { color: var(--muted); font-size: 13px; }
     .entry {
@@ -97,36 +104,37 @@
       margin-top: 8px;
       white-space: pre-wrap;
     }
-    .status.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-    .status.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-    .debug-bar {
-      background: #ffeb3b;
-      color: #000;
-      padding: 8px;
-      border-radius: 6px;
-      margin: 10px 0;
-      font-size: 14px;
+    .status.ok { background: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+    .status.err { background: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+
+    /* جست‌وجو */
+    .search-box {
+      margin: 12px 0 4px 0;
     }
-    .log-box {
-      background: #111827;
-      color: #e5e7eb;
-      padding: 10px;
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b1226;
+      color: var(--text);
+    }
+    .sort-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .sort-btn {
+      padding: 6px 10px;
+      font-size: 13px;
       border-radius: 8px;
-      font-family: ui-monospace, SFMono, Menlo, Consolas, monospace;
-      font-size: 12px;
-      white-space: pre-wrap;
-      max-height: 220px;
-      overflow: auto;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="debug-bar">
-      اگر این نوار زرد را می‌بینی، یعنی HTML لود شده است.
-    </div>
-
     <header>
       <h1>واژه‌نامه‌ی من</h1>
       <div id="authBar" class="row">
@@ -146,7 +154,7 @@
       </div>
     </section>
 
-    <!-- بخش واژه‌نامه (بعد از ورود نمایش داده می‌شود) -->
+    <!-- بخش واژه‌نامه -->
     <section id="appCard" class="card hidden">
       <h2 style="margin:0 0 8px 0; font-size:16px;">افزودن واژه</h2>
       <div class="row" style="flex-direction:column; gap:8px;">
@@ -156,44 +164,30 @@
         <div id="appStatus" class="status hidden"></div>
       </div>
 
-      <h2 style="margin:16px 0 8px 0; font-size:16px;">واژه‌های من</h2>
-      <div id="entriesList"></div>
-    </section>
+      <div class="sort-row">
+        <h2 style="margin:16px 0 8px 0; font-size:16px;">واژه‌های من</h2>
+        <button id="btnSort" class="secondary sort-btn">مرتب‌سازی الفبایی</button>
+      </div>
 
-    <!-- لاگ‌باکس دیباگ -->
-    <section class="card">
-      <h2 style="margin:0 0 8px 0; font-size:16px;">لاگ‌های دیباگ</h2>
-      <div class="muted">هر اتفاقی در جاوااسکریپت بیفتد، اینجا نوشته می‌شود.</div>
-      <div id="logBox" class="log-box"></div>
+      <!-- جست‌وجو -->
+      <div class="search-box">
+        <input id="searchInput" class="search-input" type="text" placeholder="جست‌وجو در واژه و معنی…" />
+      </div>
+
+      <div id="entriesList"></div>
     </section>
   </div>
 
-  <!-- Supabase (لود مستقیم از CDN خود Supabase) -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    // ===== تنظیمات =====
     const SUPABASE_URL = "https://bmuwpcqqgxvoghxkaqch.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdXdwY3FxZ3h2b2doeGthcWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDczMzYsImV4cCI6MjEwMjgyMzMzNn0.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ===== لاگر ساده =====
-    const logBox = document.getElementById("logBox");
-    function log(msg, type = "info") {
-      const time = new Date().toLocaleTimeString();
-      const prefix = type === "error" ? "[ERROR]" : type === "warn" ? "[WARN]" : "[INFO]";
-      const line = `${prefix} ${time} — ${msg}\n`;
-      logBox.textContent += line;
-      logBox.scrollTop = logBox.scrollHeight;
-      try { console.log(line); } catch {}
-    }
-
-    log("شروع اسکریپت ماژولار…");
-    log("Supabase URL: " + SUPABASE_URL);
-
-    // ===== المان‌ها =====
     const loginCard = document.getElementById("loginCard");
     const appCard = document.getElementById("appCard");
     const authBar = document.getElementById("authBar");
@@ -210,10 +204,13 @@
     const btnAdd = document.getElementById("btnAdd");
     const appStatus = document.getElementById("appStatus");
     const entriesList = document.getElementById("entriesList");
+    const searchInput = document.getElementById("searchInput");
+    const btnSort = document.getElementById("btnSort");
 
     let currentUser = null;
+    let allEntries = [];          // همهٔ واژه‌ها
+    let sortedAsc = true;         // وضعیت مرتب‌سازی
 
-    // ===== وضعیت‌نما =====
     function showStatus(el, msg, ok) {
       el.textContent = msg;
       el.classList.remove("ok", "err", "hidden");
@@ -221,27 +218,17 @@
       setTimeout(() => el.classList.add("hidden"), 8000);
     }
 
-    // ===== Auth =====
     async function refreshSession() {
       try {
-        log("در حال بررسی session…");
         const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          log("خطا در getSession: " + error.message, "error");
-          showLogin();
-          return;
-        }
-        if (!session) {
-          log("هیچ session فعالی یافت نشد.", "warn");
+        if (error || !session) {
           showLogin();
           return;
         }
         currentUser = session.user;
-        log("کاربر لاگین‌شده: " + (currentUser?.email || "ناشناس"));
         showApp();
         loadEntries();
-      } catch (e) {
-        log("خطای کلی در refreshSession: " + (e?.message || e), "error");
+      } catch {
         showLogin();
       }
     }
@@ -261,61 +248,36 @@
     }
 
     btnLogin.addEventListener("click", async () => {
-      log("دکمهٔ ورود فشرده شد.");
       loginStatus.classList.add("hidden");
       const email = emailIn.value.trim();
       const password = passIn.value;
       if (!email || !password) {
-        const msg = "ایمیل و رمز را وارد کن.";
-        log(msg, "warn");
-        showStatus(loginStatus, msg, false);
+        showStatus(loginStatus, "ایمیل و رمز را وارد کن.", false);
         return;
       }
-
-      log("در حال تلاش برای signInWithPassword با ایمیل: " + email);
-
       try {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-        if (error) {
-          const msg = "ورود ناموفق:\n" + error.message;
-          log("خطای signInWithPassword: " + error.message, "error");
-          showStatus(loginStatus, msg, false);
+        if (error || !data?.user) {
+          showStatus(loginStatus, "ورود ناموفق:\n" + (error?.message || "خطای ناشناخته"), false);
           return;
         }
-
-        if (!data?.user) {
-          const msg = "ورود ناموفق:\nکاربری یافت نشد.";
-          log("signInWithPassword: کاربری بازنگشت.", "error");
-          showStatus(loginStatus, msg, false);
-          return;
-        }
-
         currentUser = data.user;
-        log("ورود موفق؛ کاربر: " + currentUser.email);
         showApp();
         loadEntries();
       } catch (e) {
-        const msg = "خطا در ورود:\n" + (e?.message || "خطای ناشناخته");
-        log("خطای کلی در btnLogin: " + (e?.message || e), "error");
-        showStatus(loginStatus, msg, false);
+        showStatus(loginStatus, "خطا در ورود:\n" + (e?.message || "خطای ناشناخته"), false);
       }
     });
 
     btnLogout.addEventListener("click", async () => {
-      log("دکمهٔ خروج فشرده شد.");
       await supabase.auth.signOut();
       showLogin();
       entriesList.innerHTML = "";
+      allEntries = [];
     });
 
-    // ===== CRUD واژه‌ها =====
     async function loadEntries() {
-      if (!currentUser) {
-        log("loadEntries: کاربری لاگین نیست.", "warn");
-        return;
-      }
-      log("در حال بارگذاری واژه‌ها برای کاربر: " + currentUser.id);
+      if (!currentUser) return;
       const { data, error } = await supabase
         .from("entries")
         .select("*")
@@ -323,12 +285,11 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        log("خطا در loadEntries: " + error.message, "error");
         showStatus(appStatus, "خطا در بارگذاری:\n" + error.message, false);
         return;
       }
-      log("تعداد واژه‌های بارگذاری‌شده: " + (data?.length || 0));
-      renderEntries(data || []);
+      allEntries = data || [];
+      renderEntries(allEntries);
     }
 
     function renderEntries(rows) {
@@ -375,6 +336,32 @@
       });
     }
 
+    // فیلتر بر اساس جست‌وجو
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      if (!q) {
+        renderEntries(allEntries);
+        return;
+      }
+      const filtered = allEntries.filter(r => {
+        const term = (r.term || "").toLowerCase();
+        const def = (r.definition || "").toLowerCase();
+        return term.includes(q) || def.includes(q);
+      });
+      renderEntries(filtered);
+    });
+
+    // مرتب‌سازی الفبایی
+    btnSort.addEventListener("click", () => {
+      sortedAsc = !sortedAsc;
+      const sorted = [...allEntries].sort((a, b) => {
+        const ta = (a.term || "").localeCompare("fa");
+        const tb = (b.term || "").localeCompare("fa");
+        return sortedAsc ? ta - tb : tb - ta;
+      });
+      renderEntries(sorted);
+    });
+
     async function addEntry() {
       if (!currentUser) return;
       const term = termIn.value.trim();
@@ -383,14 +370,12 @@
         showStatus(appStatus, "حداقل یکی از فیلدها را پر کن.", false);
         return;
       }
-      log("در حال افزودن واژه: " + JSON.stringify({ term, definition }));
       const { error } = await supabase.from("entries").insert({
         user_id: currentUser.id,
         term,
         definition
       });
       if (error) {
-        log("خطا در addEntry: " + error.message, "error");
         showStatus(appStatus, "خطا در افزودن:\n" + error.message, false);
         return;
       }
@@ -408,7 +393,6 @@
 
       supabase.from("entries").update({ term: newTerm, definition: newDef }).eq("id", row.id).then(({ error }) => {
         if (error) {
-          log("خطا در ویرایش: " + error.message, "error");
           showStatus(appStatus, "خطا در ویرایش:\n" + error.message, false);
           return;
         }
@@ -419,10 +403,8 @@
 
     async function deleteEntry(id) {
       if (!confirm("آیا مطمئنی؟")) return;
-      log("در حال حذف واژه با id: " + id);
       const { error } = await supabase.from("entries").delete().eq("id", id);
       if (error) {
-        log("خطا در حذف: " + error.message, "error");
         showStatus(appStatus, "خطا در حذف:\n" + error.message, false);
         return;
       }
@@ -432,8 +414,6 @@
 
     btnAdd.addEventListener("click", addEntry);
 
-    // ===== شروع =====
-    log("فراخوانی refreshSession…");
     refreshSession();
   </script>
 </body>
