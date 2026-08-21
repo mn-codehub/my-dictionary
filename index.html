@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی من — نسخهٔ دیباگ</title>
+  <title>واژه‌نامه‌ی من — نسخهٔ دیباگ ۲</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -124,7 +124,7 @@
 <body>
   <div class="container">
     <div class="debug-bar">
-      اگر این نوار زرد را می‌بینی، یعنی کد لود شده است.
+      اگر این نوار زرد را می‌بینی، یعنی HTML لود شده است.
     </div>
 
     <header>
@@ -168,14 +168,16 @@
     </section>
   </div>
 
-  <!-- Supabase (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
+  <!-- Supabase (لود مستقیم از CDN خود Supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
     // ===== تنظیمات =====
     const SUPABASE_URL = "https://bmuwpcqqgxvoghxkaqch.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdXdwY3FxZ3h2b2doeGthcWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDczMzYsImV4cCI6MjEwMjgyMzMzNn0.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ===== لاگر ساده =====
     const logBox = document.getElementById("logBox");
@@ -185,10 +187,10 @@
       const line = `${prefix} ${time} — ${msg}\n`;
       logBox.textContent += line;
       logBox.scrollTop = logBox.scrollHeight;
-      console.log(line);
+      try { console.log(line); } catch {}
     }
 
-    log("شروع اسکریپت…");
+    log("شروع اسکریپت ماژولار…");
     log("Supabase URL: " + SUPABASE_URL);
 
     // ===== المان‌ها =====
