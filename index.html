@@ -95,6 +95,7 @@
       padding: 6px 8px;
       border-radius: 6px;
       margin-top: 8px;
+      white-space: pre-wrap;
     }
     .status.ok { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     .status.err { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
@@ -170,7 +171,7 @@
       el.textContent = msg;
       el.classList.remove("ok", "err", "hidden");
       el.classList.add(ok ? "ok" : "err");
-      setTimeout(() => el.classList.add("hidden"), 2500);
+      setTimeout(() => el.classList.add("hidden"), 4000);
     }
 
     // ===== Auth =====
@@ -209,7 +210,8 @@
       }
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error || !data?.user) {
-        showStatus(loginStatus, "ورود ناموفق: " + (error?.message || "خطا"), false);
+        const msg = "ورود ناموفق:\n" + (error?.message || "خطای ناشناخته");
+        showStatus(loginStatus, msg, false);
         return;
       }
       currentUser = data.user;
@@ -233,7 +235,7 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        showStatus(appStatus, "خطا در بارگذاری: " + error.message, false);
+        showStatus(appStatus, "خطا در بارگذاری:\n" + error.message, false);
         return;
       }
       renderEntries(data || []);
@@ -297,7 +299,7 @@
         definition
       });
       if (error) {
-        showStatus(appStatus, "خطا در افزودن: " + error.message, false);
+        showStatus(appStatus, "خطا در افزودن:\n" + error.message, false);
         return;
       }
       termIn.value = "";
@@ -314,7 +316,7 @@
 
       supabase.from("entries").update({ term: newTerm, definition: newDef }).eq("id", row.id).then(({ error }) => {
         if (error) {
-          showStatus(appStatus, "خطا در ویرایش: " + error.message, false);
+          showStatus(appStatus, "خطا در ویرایش:\n" + error.message, false);
           return;
         }
         showStatus(appStatus, "ویرایش شد.", true);
@@ -326,7 +328,7 @@
       if (!confirm("آیا مطمئنی؟")) return;
       const { error } = await supabase.from("entries").delete().eq("id", id);
       if (error) {
-        showStatus(appStatus, "خطا در حذف: " + error.message, false);
+        showStatus(appStatus, "خطا در حذف:\n" + error.message, false);
         return;
       }
       showStatus(appStatus, "حذف شد.", true);
