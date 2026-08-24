@@ -306,7 +306,6 @@
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-    // NEW Supabase credentials for multilingual dictionary
     const SUPABASE_URL = "https://bmuwpcqqgxvoghxkaqch.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdXdwY3FxZ3h2b2doeGthcWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDczMzYsImV4cCI6MjEwMjgyMzMzNn0.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
 
@@ -357,34 +356,221 @@
     }
 
     async function refreshSession() {
+      console.log("refreshSession called");
       try {
         const { data, error } = await supabase.auth.getSession();
+        console.log("getSession result:", { data, error });
+
         if (error || !data.session) {
+          console.log("No valid session, showing login");
           showLogin();
           return;
         }
 
         currentUser = data.session.user;
+        console.log("Session OK, user:", currentUser?.email);
         showApp();
         await loadEntries();
-      } catch {
+      } catch (e) {
+        console.error("refreshSession error:", e);
         showLogin();
       }
     }
 
     async function loadEntries() {
+      console.log("loadEntries called, currentUser:", currentUser?.email);
       if (!currentUser) return;
 
-      // CHANGED: Now using word_entries table instead of entries
       const { data, error } = await supabase
         .from("word_entries")
         .select("*")
         .eq("user_id", currentUser.id)
         .order("created_at", { ascending: false });
 
+      console.log("loadEntries result:", { data, error });
+
       if (error) {
         showStatus(appStatus, "خطا در بارگذاری واژه‌ها:\n" + error.message, false);
         return;
       }
 
-      allEntries
+      allEntries = data || [];
+      renderEntries();
+    }
+
+    function renderEntries() {
+      const query = (searchInput.value || "").trim().toLowerCase();
+
+      let filtered = allEntries;
+      if (query) {
+        filtered = allEntries.filter(e => {
+          const t = (e.term || "").toLowerCase();
+          const d = (e.definition || "").toLowerCase();
+          return t.includes(query) || d.includes(query);
+        });
+      }
+
+      if (alphabetical) {
+        filtered = [...filtered].sort((a, b) =>
+          (a.term || "").localeCompare(b.term || "", "fa")
+        );
+      }
+
+      entriesList.innerHTML = "";
+
+      if (!filtered.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = query
+          ? "هیچ واژه‌ای با این جست‌وجو یافت نشد."
+          : "هنوز واژه‌ای اضافه نکرده‌اید.";
+        entriesList.appendChild(empty);
+        return;
+      }
+
+      for (const e of filtered) {
+        const row = document.createElement("div");
+        row.className = "entry";
+
+        const textCol = document.createElement("div");
+        const termEl = document.createElement("div");
+        termEl.className = "term";
+        termEl.textContent = e.term || "";
+
+        const defEl = document.createElement("div");
+        defEl.className = "definition";
+        defEl.textContent = e.definition || "";
+
+        textCol.appendChild(termEl);
+        textCol.appendChild(defEl);
+
+        const actionsCol = document.createElement("div");
+        actionsCol.className = "entry-actions";
+
+        const btnDelete = document.createElement("button");
+        btnDelete.type = "button";
+        btnDelete.className = "danger small-button";
+        btnDelete.textContent = "حذف";
+        btnDelete.addEventListener("click", async () => {
+          if (!confirm(`آیا مطمئنید می‌خواهید «${e.term}» را حذف کنید؟`)) return;
+
+          const { error } = await supabase
+            .from("word_entries")
+            .delete()
+            .eq("id", e.id)
+            .eq("user_id", currentUser.id);
+
+          if (error) {
+            showStatus(appStatus, "خطا در حذف واژه:\n" + error.message, false);
+            return;
+          }
+
+          allEntries = allEntries.filter(x => x.id !== e.id);
+          renderEntries();
+          showStatus(appStatus, "واژه حذف شد.", true);
+        });
+
+        actionsCol.appendChild(btnDelete);
+        row.appendChild(textCol);
+        row.appendChild(actionsCol);
+        entriesList.appendChild(row);
+      }
+    }
+
+    // Login
+    btnLogin.addEventListener("click", async () => {
+      console.log("btnLogin clicked");
+
+      loginStatus.classList.add("hidden");
+      const email = emailIn.value.trim();
+      const password = passIn.value;
+
+      console.log("Email:", email, "Password length:", password?.length);
+
+      if (!email || !password) {
+        showStatus(loginStatus, "لطفاً ایمیل و رمز عبور را وارد کنید.", false);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      console.log("Login result:", { data, error });
+
+      if (error) {
+        showStatus(loginStatus, "خطا در ورود:\n" + error.message, false);
+        return;
+      }
+
+      currentUser = data.user;
+      showApp();
+      await loadEntries();
+      showStatus(loginStatus, "ورود موفقیت‌آمیز بود.", true);
+      emailIn.value = "";
+      passIn.value = "";
+    });
+
+    // Logout
+    btnLogout.addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      showLogin();
+    });
+
+    // Add entry
+    btnAdd.addEventListener("click", async () => {
+      appStatus.classList.add("hidden");
+      const term = termIn.value.trim();
+      const definition = definitionIn.value.trim();
+
+      if (!term) {
+        showStatus(appStatus, "لطفاً حداقل «واژه» را وارد کنید.", false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("word_entries")
+        .insert({
+          user_id: currentUser.id,
+          term,
+          definition: definition || "",
+        })
+        .select();
+
+      if (error) {
+        showStatus(appStatus, "خطا در افزودن واژه:\n" + error.message, false);
+        return;
+      }
+
+      const [newEntry] = data || [];
+      if (newEntry) {
+        allEntries.unshift(newEntry);
+      }
+
+      termIn.value = "";
+      definitionIn.value = "";
+      renderEntries();
+      showStatus(appStatus, "واژه با موفقیت افزوده شد.", true);
+    });
+
+    // Sort toggle
+    btnSort.addEventListener("click", () => {
+      alphabetical = !alphabetical;
+      btnSort.textContent = alphabetical
+        ? "نمایش بر اساس زمان"
+        : "مرتب‌سازی الفبایی";
+      renderEntries();
+    });
+
+    // Search
+    searchInput.addEventListener("input", () => {
+      renderEntries();
+    });
+
+    // Init
+    console.log("App script loaded");
+    refreshSession();
+  </script>
+</body>
+</html>
