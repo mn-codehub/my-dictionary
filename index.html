@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی من</title>
+  <title>واژه‌نامه‌ی تخصصی با IPA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <!-- Android / PWA -->
@@ -105,6 +105,7 @@
     }
 
     input,
+    select,
     textarea,
     button {
       width: 100%;
@@ -114,6 +115,7 @@
     }
 
     input,
+    select,
     textarea {
       border: 1px solid #35436a;
       padding: 11px 12px;
@@ -123,6 +125,7 @@
     }
 
     input:focus,
+    select:focus,
     textarea:focus {
       border-color: var(--gold-1);
       box-shadow: 0 0 0 3px rgba(255, 215, 106, .13);
@@ -206,6 +209,13 @@
       margin-top: 22px;
     }
 
+    .filters-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 4px 0 10px;
+    }
+
     .search-input {
       margin: 4px 0 10px;
     }
@@ -222,6 +232,32 @@
       border-bottom: 0;
     }
 
+    .term-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .lang-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #3a4a75;
+      color: #cfd6e6;
+      background: #0f1a36;
+    }
+
+    .ipa-badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid #4a3a75;
+      color: #e6cfd6;
+      background: #1a0f36;
+      font-family: "Courier New", Courier, monospace;
+    }
+
     .term {
       color: #fff3c5;
       font-size: 16px;
@@ -231,6 +267,12 @@
       margin-top: 3px;
       color: var(--muted);
       overflow-wrap: anywhere;
+    }
+
+    .source {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9fb0d6;
     }
 
     .entry-actions {
@@ -257,6 +299,7 @@
       .entry { grid-template-columns: 1fr; }
       .entry-actions { justify-content: flex-start; }
       h1 { font-size: 20px; }
+      .filters-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -264,7 +307,7 @@
 <body>
   <main class="container">
     <header>
-      <h1>واژه‌نامه‌ی من</h1>
+      <h1>واژه‌نامه‌ی تخصصی</h1>
       <div id="authBar" class="row hidden">
         <span id="userEmail" class="muted"></span>
         <button id="btnLogout" class="secondary small-button" type="button">خروج</button>
@@ -285,8 +328,33 @@
       <h2>افزودن واژه</h2>
 
       <div class="column">
-        <input id="term" type="text" placeholder="واژه" />
-        <textarea id="definition" placeholder="معنی یا توضیح"></textarea>
+        <input id="wordOriginal" type="text" placeholder="واژه (word_original)" />
+        <input id="ipa" type="text" placeholder="تلفظ IPA (اختیاری)" />
+        <input id="persianEquivalent" type="text" placeholder="معادل فارسی/سره (اختیاری)" />
+        <textarea id="meaningOriginal" placeholder="معنی یا توضیح (meaning_original)"></textarea>
+        <input id="pronunciationSource" type="text" placeholder="منبع تلفظ/معنی (اختیاری)" />
+
+        <div class="filters-row">
+          <select id="languageId">
+            <option value="fa">فارسی (fa)</option>
+            <option value="en">انگلیسی (en)</option>
+            <option value="de">آلمانی (de)</option>
+            <option value="fr">فرانسوی (fr)</option>
+            <option value="ar">عربی (ar)</option>
+            <option value="tr">ترکی (tr)</option>
+          </select>
+
+          <select id="filterLanguageId">
+            <option value="">همه‌ی زبان‌ها</option>
+            <option value="fa">فارسی (fa)</option>
+            <option value="en">انگلیسی (en)</option>
+            <option value="de">آلمانی (de)</option>
+            <option value="fr">فرانسوی (fr)</option>
+            <option value="ar">عربی (ar)</option>
+            <option value="tr">ترکی (tr)</option>
+          </select>
+        </div>
+
         <button id="btnAdd" type="button">افزودن واژه</button>
       </div>
 
@@ -297,7 +365,7 @@
         <button id="btnSort" class="secondary small-button" type="button">مرتب‌سازی الفبایی</button>
       </div>
 
-      <input id="searchInput" class="search-input" type="search" placeholder="جست‌وجو در واژه یا معنی…" />
+      <input id="searchInput" class="search-input" type="search" placeholder="جست‌وجو در واژه، IPA، معنی، معادل فارسی، منبع…" />
 
       <div id="entriesList"></div>
     </section>
@@ -322,13 +390,19 @@
     const btnLogin = document.getElementById("btnLogin");
     const loginStatus = document.getElementById("loginStatus");
 
-    const termIn = document.getElementById("term");
-    const definitionIn = document.getElementById("definition");
+    const wordOriginalIn = document.getElementById("wordOriginal");
+    const ipaIn = document.getElementById("ipa");
+    const persianEquivalentIn = document.getElementById("persianEquivalent");
+    const meaningOriginalIn = document.getElementById("meaningOriginal");
+    const pronunciationSourceIn = document.getElementById("pronunciationSource");
+    const languageIdIn = document.getElementById("languageId");
     const btnAdd = document.getElementById("btnAdd");
     const appStatus = document.getElementById("appStatus");
 
     const searchInput = document.getElementById("searchInput");
     const btnSort = document.getElementById("btnSort");
+    const filterLanguageId = document.getElementById("filterLanguageId");
+
     const entriesList = document.getElementById("entriesList");
 
     let currentUser = null;
@@ -400,19 +474,29 @@
 
     function renderEntries() {
       const query = (searchInput.value || "").trim().toLowerCase();
+      const fLang = (filterLanguageId.value || "").trim();
 
       let filtered = allEntries;
+
+      if (fLang) {
+        filtered = filtered.filter(e => (e.language_id || "") === fLang);
+      }
+
       if (query) {
-        filtered = allEntries.filter(e => {
-          const t = (e.term || "").toLowerCase();
-          const d = (e.definition || "").toLowerCase();
-          return t.includes(query) || d.includes(query);
+        filtered = filtered.filter(e => {
+          const w = (e.word_original || "").toLowerCase();
+          const i = (e.ipa || "").toLowerCase();
+          const m = (e.meaning_original || "").toLowerCase();
+          const p = (e.persian_sereh_equivalent || "").toLowerCase();
+          const ps = (e.pronunciation_source || "").toLowerCase();
+          const l = (e.language_id || "").toLowerCase();
+          return w.includes(query) || i.includes(query) || m.includes(query) || p.includes(query) || ps.includes(query) || l.includes(query);
         });
       }
 
       if (alphabetical) {
         filtered = [...filtered].sort((a, b) =>
-          (a.term || "").localeCompare(b.term || "", "fa")
+          (a.word_original || "").localeCompare(b.word_original || "", "fa")
         );
       }
 
@@ -421,8 +505,8 @@
       if (!filtered.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = query
-          ? "هیچ واژه‌ای با این جست‌وجو یافت نشد."
+        empty.textContent = query || fLang
+          ? "هیچ واژه‌ای با این فیلترها یافت نشد."
           : "هنوز واژه‌ای اضافه نکرده‌اید.";
         entriesList.appendChild(empty);
         return;
@@ -433,16 +517,48 @@
         row.className = "entry";
 
         const textCol = document.createElement("div");
+
+        const termRow = document.createElement("div");
+        termRow.className = "term-row";
+
+        const langBadge = document.createElement("span");
+        langBadge.className = "lang-badge";
+        langBadge.textContent = e.language_id || "?";
+
         const termEl = document.createElement("div");
         termEl.className = "term";
-        termEl.textContent = e.term || "";
+        termEl.textContent = e.word_original || "";
+
+        termRow.appendChild(langBadge);
+        termRow.appendChild(termEl);
+
+        if (e.ipa) {
+          const ipaEl = document.createElement("span");
+          ipaEl.className = "ipa-badge";
+          ipaEl.textContent = e.ipa;
+          termRow.appendChild(ipaEl);
+        }
 
         const defEl = document.createElement("div");
         defEl.className = "definition";
-        defEl.textContent = e.definition || "";
+        defEl.textContent = e.meaning_original || "";
 
-        textCol.appendChild(termEl);
+        textCol.appendChild(termRow);
         textCol.appendChild(defEl);
+
+        if (e.persian_sereh_equivalent) {
+          const peEl = document.createElement("div");
+          peEl.className = "source";
+          peEl.textContent = "معادل فارسی: " + e.persian_sereh_equivalent;
+          textCol.appendChild(peEl);
+        }
+
+        if (e.pronunciation_source) {
+          const psEl = document.createElement("div");
+          psEl.className = "source";
+          psEl.textContent = "منبع: " + e.pronunciation_source;
+          textCol.appendChild(psEl);
+        }
 
         const actionsCol = document.createElement("div");
         actionsCol.className = "entry-actions";
@@ -452,7 +568,7 @@
         btnDelete.className = "danger small-button";
         btnDelete.textContent = "حذف";
         btnDelete.addEventListener("click", async () => {
-          if (!confirm(`آیا مطمئنید می‌خواهید «${e.term}» را حذف کنید؟`)) return;
+          if (!confirm(`آیا مطمئنید می‌خواهید «${e.word_original}» [${e.language_id}] را حذف کنید؟`)) return;
 
           const { error } = await supabase
             .from("word_entries")
@@ -521,10 +637,15 @@
     // Add entry
     btnAdd.addEventListener("click", async () => {
       appStatus.classList.add("hidden");
-      const term = termIn.value.trim();
-      const definition = definitionIn.value.trim();
 
-      if (!term) {
+      const word_original = wordOriginalIn.value.trim();
+      const ipa = ipaIn.value.trim();
+      const persian_sereh_equivalent = persianEquivalentIn.value.trim();
+      const meaning_original = meaningOriginalIn.value.trim();
+      const pronunciation_source = pronunciationSourceIn.value.trim();
+      const language_id = languageIdIn.value.trim();
+
+      if (!word_original) {
         showStatus(appStatus, "لطفاً حداقل «واژه» را وارد کنید.", false);
         return;
       }
@@ -533,8 +654,27 @@
         .from("word_entries")
         .insert({
           user_id: currentUser.id,
-          term,
-          definition: definition || "",
+          word_original,
+          ipa: ipa || "",
+          persian_sereh_equivalent: persian_sereh_equivalent || "",
+          meaning_original: meaning_original || "",
+          pronunciation_source: pronunciation_source || "",
+          language_id,
+          // بقیه‌ی فیلدها را خالی/پیش‌فرض می‌گذاریم
+          transliteration: "",
+          pronunciation_link: "",
+          pronunciation_tradition: "",
+          audio_file_url: "",
+          etymology_root: "",
+          meaning_source: "",
+          textual_example: "",
+          credibility_level: "",
+          persian_sereh_source: "",
+          persian_sereh_status: "",
+          research_notes: "",
+          conflicting_sources: "",
+          needs_review: false,
+          time_period: "",
         })
         .select();
 
@@ -548,8 +688,12 @@
         allEntries.unshift(newEntry);
       }
 
-      termIn.value = "";
-      definitionIn.value = "";
+      wordOriginalIn.value = "";
+      ipaIn.value = "";
+      persianEquivalentIn.value = "";
+      meaningOriginalIn.value = "";
+      pronunciationSourceIn.value = "";
+
       renderEntries();
       showStatus(appStatus, "واژه با موفقیت افزوده شد.", true);
     });
@@ -563,10 +707,9 @@
       renderEntries();
     });
 
-    // Search
-    searchInput.addEventListener("input", () => {
-      renderEntries();
-    });
+    // Search & filters
+    searchInput.addEventListener("input", renderEntries);
+    filterLanguageId.addEventListener("change", renderEntries);
 
     // Init
     console.log("App script loaded");
