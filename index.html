@@ -155,6 +155,11 @@
       transform: translateY(1px);
     }
 
+    button:disabled {
+      cursor: wait;
+      opacity: .68;
+    }
+
     button.secondary {
       background: linear-gradient(180deg, var(--silver-1), var(--silver-2));
       box-shadow: 0 4px 12px rgba(119, 128, 146, .18);
@@ -273,6 +278,7 @@
       margin-top: 4px;
       font-size: 12px;
       color: #9fb0d6;
+      overflow-wrap: anywhere;
     }
 
     .entry-actions {
@@ -355,6 +361,10 @@
           </select>
         </div>
 
+        <button id="btnFetchAuto" class="secondary" type="button">
+          دریافت اطلاعات خودکار از Wiktionary
+        </button>
+
         <button id="btnAdd" type="button">افزودن واژه</button>
       </div>
 
@@ -396,23 +406,46 @@
     const meaningOriginalIn = document.getElementById("meaningOriginal");
     const pronunciationSourceIn = document.getElementById("pronunciationSource");
     const languageIdIn = document.getElementById("languageId");
+
+    const btnFetchAuto = document.getElementById("btnFetchAuto");
     const btnAdd = document.getElementById("btnAdd");
     const appStatus = document.getElementById("appStatus");
 
     const searchInput = document.getElementById("searchInput");
     const btnSort = document.getElementById("btnSort");
     const filterLanguageId = document.getElementById("filterLanguageId");
-
     const entriesList = document.getElementById("entriesList");
 
     let currentUser = null;
     let allEntries = [];
     let alphabetical = false;
 
+    /*
+      این متغیرها فقط نتیجه‌ی آخرین جست‌وجوی خودکار را تا زمان
+      ذخیره‌ی واژه در حافظه‌ی صفحه نگه می‌دارند. با رفرش صفحه پاک می‌شوند.
+    */
+    let autoLookupData = {
+      etymology: "",
+      audioUrl: "",
+      sourceUrl: "",
+      sourceName: "",
+      sourcesUsed: [],
+    };
+
     function showStatus(element, message, isOk) {
       element.textContent = message;
       element.className = "status " + (isOk ? "ok" : "err");
       window.setTimeout(() => element.classList.add("hidden"), 7000);
+    }
+
+    function resetAutoLookupData() {
+      autoLookupData = {
+        etymology: "",
+        audioUrl: "",
+        sourceUrl: "",
+        sourceName: "",
+        sourcesUsed: [],
+      };
     }
 
     function showLogin() {
@@ -430,29 +463,24 @@
     }
 
     async function refreshSession() {
-      console.log("refreshSession called");
       try {
         const { data, error } = await supabase.auth.getSession();
-        console.log("getSession result:", { data, error });
 
         if (error || !data.session) {
-          console.log("No valid session, showing login");
           showLogin();
           return;
         }
 
         currentUser = data.session.user;
-        console.log("Session OK, user:", currentUser?.email);
         showApp();
         await loadEntries();
-      } catch (e) {
-        console.error("refreshSession error:", e);
+      } catch (error) {
+        console.error("refreshSession error:", error);
         showLogin();
       }
     }
 
     async function loadEntries() {
-      console.log("loadEntries called, currentUser:", currentUser?.email);
       if (!currentUser) return;
 
       const { data, error } = await supabase
@@ -460,8 +488,6 @@
         .select("*")
         .eq("user_id", currentUser.id)
         .order("created_at", { ascending: false });
-
-      console.log("loadEntries result:", { data, error });
 
       if (error) {
         showStatus(appStatus, "خطا در بارگذاری واژه‌ها:\n" + error.message, false);
@@ -484,13 +510,20 @@
 
       if (query) {
         filtered = filtered.filter(e => {
-          const w = (e.word_original || "").toLowerCase();
-          const i = (e.ipa || "").toLowerCase();
-          const m = (e.meaning_original || "").toLowerCase();
-          const p = (e.persian_sereh_equivalent || "").toLowerCase();
-          const ps = (e.pronunciation_source || "").toLowerCase();
-          const l = (e.language_id || "").toLowerCase();
-          return w.includes(query) || i.includes(query) || m.includes(query) || p.includes(query) || ps.includes(query) || l.includes(query);
+          const fields = [
+            e.word_original,
+            e.ipa,
+            e.meaning_original,
+            e.persian_sereh_equivalent,
+            e.pronunciation_source,
+            e.meaning_source,
+            e.etymology_root,
+            e.language_id,
+          ];
+
+          return fields.some(value =>
+            String(value || "").toLowerCase().includes(query)
+          );
         });
       }
 
@@ -556,8 +589,15 @@
         if (e.pronunciation_source) {
           const psEl = document.createElement("div");
           psEl.className = "source";
-          psEl.textContent = "منبع: " + e.pronunciation_source;
+          psEl.textContent = "منبع تلفظ: " + e.pronunciation_source;
           textCol.appendChild(psEl);
+        }
+
+        if (e.meaning_source) {
+          const msEl = document.createElement("div");
+          msEl.className = "source";
+          msEl.textContent = "منبع داده: " + e.meaning_source;
+          textCol.appendChild(msEl);
         }
 
         const actionsCol = document.createElement("div");
@@ -567,8 +607,11 @@
         btnDelete.type = "button";
         btnDelete.className = "danger small-button";
         btnDelete.textContent = "حذف";
+
         btnDelete.addEventListener("click", async () => {
-          if (!confirm(`آیا مطمئنید می‌خواهید «${e.word_original}» [${e.language_id}] را حذف کنید؟`)) return;
+          if (!confirm(`آیا مطمئنید می‌خواهید «${e.word_original}» [${e.language_id}] را حذف کنید؟`)) {
+            return;
+          }
 
           const { error } = await supabase
             .from("word_entries")
@@ -593,50 +636,166 @@
       }
     }
 
-    // Login
+    // ورود
     btnLogin.addEventListener("click", async () => {
-      console.log("btnLogin clicked");
-
       loginStatus.classList.add("hidden");
+
       const email = emailIn.value.trim();
       const password = passIn.value;
-
-      console.log("Email:", email, "Password length:", password?.length);
 
       if (!email || !password) {
         showStatus(loginStatus, "لطفاً ایمیل و رمز عبور را وارد کنید.", false);
         return;
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      btnLogin.disabled = true;
+      const oldText = btnLogin.textContent;
+      btnLogin.textContent = "در حال ورود…";
 
-      console.log("Login result:", { data, error });
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
-        showStatus(loginStatus, "خطا در ورود:\n" + error.message, false);
-        return;
+        if (error) {
+          throw error;
+        }
+
+        currentUser = data.user;
+        showApp();
+        await loadEntries();
+
+        emailIn.value = "";
+        passIn.value = "";
+      } catch (error) {
+        console.error("Login error:", error);
+        showStatus(
+          loginStatus,
+          "خطا در ورود:\n" + (error?.message || "ورود انجام نشد."),
+          false
+        );
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.textContent = oldText;
       }
-
-      currentUser = data.user;
-      showApp();
-      await loadEntries();
-      showStatus(loginStatus, "ورود موفقیت‌آمیز بود.", true);
-      emailIn.value = "";
-      passIn.value = "";
     });
 
-    // Logout
+    // خروج
     btnLogout.addEventListener("click", async () => {
       await supabase.auth.signOut();
+      resetAutoLookupData();
       showLogin();
     });
 
-    // Add entry
+    // دریافت اطلاعات خودکار از Edge Function
+    btnFetchAuto.addEventListener("click", async () => {
+      appStatus.classList.add("hidden");
+
+      const word = wordOriginalIn.value.trim();
+      const language = languageIdIn.value.trim();
+
+      if (!word) {
+        showStatus(
+          appStatus,
+          "ابتدا واژه را وارد کنید، سپس دکمه‌ی دریافت اطلاعات خودکار را بزنید.",
+          false
+        );
+        return;
+      }
+
+      const oldText = btnFetchAuto.textContent;
+      btnFetchAuto.disabled = true;
+      btnFetchAuto.textContent = "در حال جست‌وجو در منابع…";
+
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          "fetch-word-data",
+          {
+            body: {
+              word,
+              language,
+            },
+          }
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data?.found) {
+          resetAutoLookupData();
+
+          const sourceLink = data?.source_url
+            ? "\nمنبع بررسی‌شده: " + data.source_url
+            : "";
+
+          showStatus(
+            appStatus,
+            (data?.message || "برای این واژه نتیجه‌ای پیدا نشد.") + sourceLink,
+            false
+          );
+          return;
+        }
+
+        if (data.ipa) {
+          ipaIn.value = data.ipa;
+        }
+
+        if (data.meaning) {
+          meaningOriginalIn.value = data.meaning;
+        }
+
+        const sourceName = data.source || "Wiktionary";
+        const sourceUrl = data.source_url || "";
+        const sourceText = sourceUrl
+          ? `${sourceName} | ${sourceUrl}`
+          : sourceName;
+
+        pronunciationSourceIn.value = sourceText;
+
+        autoLookupData = {
+          etymology: data.etymology || "",
+          audioUrl: data.audio_url || "",
+          sourceUrl,
+          sourceName,
+          sourcesUsed: Array.isArray(data.sources_used)
+            ? data.sources_used
+            : [sourceName],
+        };
+
+        const resultParts = [
+          "اطلاعات موجود از منبع دریافت و در فرم قرار گرفت.",
+          data.ipa ? "IPA پیدا شد." : "IPA در نتیجه‌ی منبع نبود.",
+          data.meaning ? "معنی/تعریف پیدا شد." : "معنی در نتیجه‌ی منبع نبود.",
+          data.audio_url ? "لینک صوتی هم پیدا شد." : "لینک صوتی پیدا نشد.",
+          "لطفاً اطلاعات را بررسی کنید و سپس «افزودن واژه» را بزنید.",
+        ];
+
+        showStatus(appStatus, resultParts.join("\n"), true);
+      } catch (error) {
+        console.error("Automatic lookup error:", error);
+
+        showStatus(
+          appStatus,
+          "خطا در دریافت اطلاعات خودکار:\n" +
+            (error?.message || "اتصال به Edge Function برقرار نشد."),
+          false
+        );
+      } finally {
+        btnFetchAuto.disabled = false;
+        btnFetchAuto.textContent = oldText;
+      }
+    });
+
+    // افزودن واژه
     btnAdd.addEventListener("click", async () => {
       appStatus.classList.add("hidden");
+
+      if (!currentUser) {
+        showStatus(appStatus, "ابتدا وارد حساب کاربری شوید.", false);
+        return;
+      }
 
       const word_original = wordOriginalIn.value.trim();
       const ipa = ipaIn.value.trim();
@@ -650,69 +809,88 @@
         return;
       }
 
-      const { data, error } = await supabase
-        .from("word_entries")
-        .insert({
-          user_id: currentUser.id,
-          word_original,
-          ipa: ipa || "",
-          persian_sereh_equivalent: persian_sereh_equivalent || "",
-          meaning_original: meaning_original || "",
-          pronunciation_source: pronunciation_source || "",
-          language_id,
-          // بقیه‌ی فیلدها را خالی/پیش‌فرض می‌گذاریم
-          transliteration: "",
-          pronunciation_link: "",
-          pronunciation_tradition: "",
-          audio_file_url: "",
-          etymology_root: "",
-          meaning_source: "",
-          textual_example: "",
-          credibility_level: "",
-          persian_sereh_source: "",
-          persian_sereh_status: "",
-          research_notes: "",
-          conflicting_sources: "",
-          needs_review: false,
-          time_period: "",
-        })
-        .select();
+      btnAdd.disabled = true;
+      const oldText = btnAdd.textContent;
+      btnAdd.textContent = "در حال ذخیره…";
 
-      if (error) {
-        showStatus(appStatus, "خطا در افزودن واژه:\n" + error.message, false);
-        return;
+      try {
+        const { data, error } = await supabase
+          .from("word_entries")
+          .insert({
+            user_id: currentUser.id,
+            word_original,
+            ipa: ipa || "",
+            persian_sereh_equivalent: persian_sereh_equivalent || "",
+            meaning_original: meaning_original || "",
+            pronunciation_source: pronunciation_source || "",
+            language_id,
+
+            transliteration: "",
+            pronunciation_link: autoLookupData.sourceUrl || "",
+            pronunciation_tradition: "",
+            audio_file_url: autoLookupData.audioUrl || "",
+            etymology_root: autoLookupData.etymology || "",
+            meaning_source: autoLookupData.sourceName || "",
+            textual_example: "",
+            credibility_level: autoLookupData.sourceName ? "source-retrieved" : "",
+            persian_sereh_source: "",
+            persian_sereh_status: "",
+            research_notes: autoLookupData.sourcesUsed.length
+              ? "دریافت خودکار از: " + autoLookupData.sourcesUsed.join(", ")
+              : "",
+            conflicting_sources: "",
+            needs_review: false,
+            time_period: "",
+          })
+          .select();
+
+        if (error) {
+          throw error;
+        }
+
+        const [newEntry] = data || [];
+        if (newEntry) {
+          allEntries.unshift(newEntry);
+        }
+
+        wordOriginalIn.value = "";
+        ipaIn.value = "";
+        persianEquivalentIn.value = "";
+        meaningOriginalIn.value = "";
+        pronunciationSourceIn.value = "";
+        resetAutoLookupData();
+
+        renderEntries();
+        showStatus(appStatus, "واژه با موفقیت ذخیره شد.", true);
+      } catch (error) {
+        console.error("Insert error:", error);
+
+        showStatus(
+          appStatus,
+          "خطا در افزودن واژه:\n" +
+            (error?.message || "ذخیره‌سازی انجام نشد."),
+          false
+        );
+      } finally {
+        btnAdd.disabled = false;
+        btnAdd.textContent = oldText;
       }
-
-      const [newEntry] = data || [];
-      if (newEntry) {
-        allEntries.unshift(newEntry);
-      }
-
-      wordOriginalIn.value = "";
-      ipaIn.value = "";
-      persianEquivalentIn.value = "";
-      meaningOriginalIn.value = "";
-      pronunciationSourceIn.value = "";
-
-      renderEntries();
-      showStatus(appStatus, "واژه با موفقیت افزوده شد.", true);
     });
 
-    // Sort toggle
+    // مرتب‌سازی
     btnSort.addEventListener("click", () => {
       alphabetical = !alphabetical;
       btnSort.textContent = alphabetical
         ? "نمایش بر اساس زمان"
         : "مرتب‌سازی الفبایی";
+
       renderEntries();
     });
 
-    // Search & filters
+    // جست‌وجو و فیلتر زبان
     searchInput.addEventListener("input", renderEntries);
     filterLanguageId.addEventListener("change", renderEntries);
 
-    // Init
-    console.log("App script loaded");
     refreshSession();
   </script>
 </body>
