@@ -20,8 +20,6 @@
     :root {
       --bg: #0b1021;
       --bg-2: #111b3d;
-      --card: #111b38;
-      --card-2: #0a1228;
       --text: #f4f6fc;
       --muted: #aab5cf;
       --gold-1: #ffe07a;
@@ -54,10 +52,6 @@
         linear-gradient(145deg, var(--bg) 0%, var(--bg-2) 100%);
       font-family: Tahoma, Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
       line-height: 1.6;
-    }
-
-    a {
-      color: #d9e8ff;
     }
 
     .container {
@@ -237,6 +231,7 @@
       margin: 0;
       color: #d7e2fb;
       font-size: 13px;
+      white-space: pre-wrap;
     }
 
     .lookup-data {
@@ -263,6 +258,7 @@
     .lookup-value {
       color: #f5f7fb;
       overflow-wrap: anywhere;
+      white-space: pre-wrap;
     }
 
     .ipa-display {
@@ -294,6 +290,7 @@
       border: 1px solid #3a4d7e;
       border-radius: 12px;
       background: #0b1733;
+      color: inherit;
     }
 
     .resource-link:hover {
@@ -438,6 +435,7 @@
 
       <div id="authBar" class="row hidden">
         <span id="userEmail" class="muted"></span>
+
         <button id="btnLogout" class="secondary small-button" type="button">
           خروج
         </button>
@@ -560,7 +558,6 @@
       <section id="lookupPanel" class="lookup-panel hidden">
         <h3>نتیجه‌ی جست‌وجوی منابع</h3>
         <p id="lookupSummary" class="lookup-summary"></p>
-
         <div id="lookupData" class="lookup-data"></div>
 
         <div id="resourceTitle" class="resource-title hidden">
@@ -594,10 +591,14 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     const SUPABASE_URL = "https://bmuwpcqqgxvoghxkaqch.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdWIiOiJibXV3cGNxcWd4dm9naHhrYXFjaCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg3MjQ3MzM2LCJleHAiOjIxMDI4MjMzMzZ9.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_5W4VpuveGHPG7ZJ9gyenAw_DfhWjqpU";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
 
     const loginCard = document.getElementById("loginCard");
     const appCard = document.getElementById("appCard");
@@ -636,15 +637,6 @@
     let allEntries = [];
     let alphabetical = false;
 
-    let autoLookupData = {
-      etymology: "",
-      audioUrl: "",
-      sourceUrl: "",
-      sourceName: "",
-      sourcesUsed: [],
-      resources: [],
-    };
-
     function showStatus(element, message, isOk) {
       element.textContent = message;
       element.className = "status " + (isOk ? "ok" : "err");
@@ -674,17 +666,6 @@
       };
     }
 
-    function resetAutoLookupData() {
-      autoLookupData = {
-        etymology: "",
-        audioUrl: "",
-        sourceUrl: "",
-        sourceName: "",
-        sourcesUsed: [],
-        resources: [],
-      };
-    }
-
     function clearLookupPanel() {
       lookupPanel.classList.add("hidden");
       lookupSummary.textContent = "";
@@ -699,7 +680,6 @@
       appCard.classList.add("hidden");
       authBar.classList.add("hidden");
       clearLookupPanel();
-      resetAutoLookupData();
     }
 
     function showApp() {
@@ -882,9 +862,6 @@
             entry.persian_sereh_equivalent,
             entry.meaning_original,
             entry.pronunciation_source,
-            entry.meaning_source,
-            entry.etymology_root,
-            entry.research_notes,
             entry.language_id,
           ];
 
@@ -1078,7 +1055,6 @@
         return;
       }
 
-      resetAutoLookupData();
       clearLookupPanel();
 
       const stopLoading = setButtonLoading(
@@ -1114,17 +1090,6 @@
             ? `${sourceName} | ${sourceUrl}`
             : sourceName;
         }
-
-        autoLookupData = {
-          etymology: data?.etymology || "",
-          audioUrl: data?.audio_url || "",
-          sourceUrl,
-          sourceName,
-          sourcesUsed: Array.isArray(data?.sources_used)
-            ? data.sources_used
-            : [],
-          resources: Array.isArray(data?.resources) ? data.resources : [],
-        };
 
         if (data?.found) {
           const resultLines = [
@@ -1183,11 +1148,6 @@
       const stopLoading = setButtonLoading(btnAdd, "در حال ذخیره…");
 
       try {
-        /*
-          فقط ستون‌هایی ارسال می‌شوند که در نسخه‌ی فعلی جدول شما
-          قطعی و امن هستند. این کار خطاهای ستون عددی با مقدار خالی
-          و خطاهای ساختار قدیمی جدول را جلوگیری می‌کند.
-        */
         const { data, error } = await supabase
           .from("word_entries")
           .insert({
@@ -1218,7 +1178,6 @@
         meaningOriginalIn.value = "";
         pronunciationSourceIn.value = "";
 
-        resetAutoLookupData();
         clearLookupPanel();
         renderEntries();
 
@@ -1250,15 +1209,8 @@
     searchInput.addEventListener("input", renderEntries);
     filterLanguageId.addEventListener("change", renderEntries);
 
-    wordOriginalIn.addEventListener("input", () => {
-      resetAutoLookupData();
-      clearLookupPanel();
-    });
-
-    languageIdIn.addEventListener("change", () => {
-      resetAutoLookupData();
-      clearLookupPanel();
-    });
+    wordOriginalIn.addEventListener("input", clearLookupPanel);
+    languageIdIn.addEventListener("change", clearLookupPanel);
 
     supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
