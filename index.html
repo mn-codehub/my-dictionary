@@ -2,86 +2,104 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>واژه‌نامه‌ی تخصصی با IPA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1021" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="واژه‌نامه" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-  <meta name="theme-color" content="#0b1021">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="واژه‌نامه">
+  <title>واژه‌نامه‌ی تخصصی با IPA</title>
 
-  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="واژه‌نامه">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
 
   <style>
     :root {
       --bg: #0b1021;
       --bg-2: #111b3d;
-      --text: #f3f4f6;
-      --muted: #aab2c3;
-      --gold-1: #ffd76a;
-      --gold-2: #b77912;
-      --silver-1: #e7e9ee;
-      --silver-2: #778092;
+      --card: #111b38;
+      --card-2: #0a1228;
+      --text: #f4f6fc;
+      --muted: #aab5cf;
+      --gold-1: #ffe07a;
+      --gold-2: #c58a14;
+      --silver-1: #f0f3fa;
+      --silver-2: #9aa4ba;
       --red-1: #fb7185;
-      --red-2: #a61f35;
-      --border: #2a365a;
-      --shadow: 0 12px 30px rgba(0, 0, 0, .38);
+      --red-2: #9f1730;
+      --green: #b8f5d2;
+      --border: #35456f;
+      --border-soft: rgba(91, 113, 168, 0.42);
+      --shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
-    html { background: var(--bg); }
+    html {
+      background: var(--bg);
+    }
 
     body {
-      margin: 0;
       min-height: 100vh;
+      margin: 0;
       color: var(--text);
       background:
-        radial-gradient(circle at 15% 0%, #1a2c5d 0%, transparent 35%),
-        radial-gradient(circle at 90% 95%, #172952 0%, transparent 35%),
+        radial-gradient(circle at 8% 0%, #1d3265 0%, transparent 32%),
+        radial-gradient(circle at 92% 94%, #1b315d 0%, transparent 34%),
         linear-gradient(145deg, var(--bg) 0%, var(--bg-2) 100%);
       font-family: Tahoma, Arial, system-ui, -apple-system, "Segoe UI", sans-serif;
-      line-height: 1.55;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #d9e8ff;
     }
 
     .container {
-      width: min(760px, 100%);
+      width: min(820px, 100%);
       margin: 0 auto;
-      padding: 24px 16px calc(32px + env(safe-area-inset-bottom));
+      padding: 22px 16px calc(36px + env(safe-area-inset-bottom));
     }
 
     header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 6px 2px 16px;
+      gap: 12px;
+      padding: 6px 2px 17px;
     }
 
     h1 {
       margin: 0;
       color: var(--gold-1);
-      font-size: 22px;
-      text-shadow: 0 1px 12px rgba(255, 215, 106, .25);
+      font-size: clamp(20px, 5vw, 25px);
+      text-shadow: 0 1px 14px rgba(255, 224, 122, 0.25);
     }
 
     h2 {
       margin: 0 0 12px;
-      font-size: 17px;
       color: var(--gold-1);
+      font-size: 17px;
+    }
+
+    h3 {
+      margin: 0 0 9px;
+      color: #dbe6ff;
+      font-size: 14px;
     }
 
     .card {
       margin-bottom: 16px;
       padding: 18px;
       border: 1px solid var(--border);
-      border-radius: 18px;
-      background: linear-gradient(160deg, rgba(22, 34, 67, .98), rgba(11, 18, 38, .98));
+      border-radius: 19px;
+      background:
+        linear-gradient(160deg, rgba(22, 35, 71, 0.97), rgba(8, 15, 33, 0.98));
       box-shadow: var(--shadow);
     }
 
@@ -98,12 +116,21 @@
       gap: 10px;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     input,
     select,
     textarea,
     button {
       width: 100%;
-      border-radius: 11px;
+      border-radius: 12px;
       font: inherit;
       font-size: 15px;
     }
@@ -111,56 +138,59 @@
     input,
     select,
     textarea {
-      border: 1px solid #35436a;
+      border: 1px solid #3b4c78;
       padding: 11px 12px;
       color: var(--text);
       outline: none;
-      background: #091126;
+      background: #081127;
     }
 
     input:focus,
     select:focus,
     textarea:focus {
       border-color: var(--gold-1);
-      box-shadow: 0 0 0 3px rgba(255, 215, 106, .13);
+      box-shadow: 0 0 0 3px rgba(255, 224, 122, 0.14);
     }
 
     input::placeholder,
     textarea::placeholder {
-      color: #8490a9;
+      color: #8795b5;
     }
 
     textarea {
-      min-height: 88px;
+      min-height: 96px;
       resize: vertical;
     }
 
     button {
-      padding: 10px 13px;
       border: 0;
-      color: #10131e;
+      padding: 11px 13px;
+      color: #121521;
       font-weight: 700;
       cursor: pointer;
       background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
-      box-shadow: 0 4px 12px rgba(183, 121, 18, .24);
+      box-shadow: 0 4px 13px rgba(197, 138, 20, 0.25);
     }
 
-    button:active { transform: translateY(1px); }
+    button:active {
+      transform: translateY(1px);
+    }
 
     button:disabled {
       cursor: wait;
-      opacity: .68;
+      opacity: 0.68;
     }
 
     button.secondary {
+      color: #172033;
       background: linear-gradient(180deg, var(--silver-1), var(--silver-2));
-      box-shadow: 0 4px 12px rgba(119, 128, 146, .18);
+      box-shadow: 0 4px 13px rgba(154, 164, 186, 0.18);
     }
 
     button.danger {
       color: #fff;
       background: linear-gradient(180deg, var(--red-1), var(--red-2));
-      box-shadow: 0 4px 12px rgba(166, 31, 53, .22);
+      box-shadow: 0 4px 13px rgba(159, 23, 48, 0.24);
     }
 
     .small-button {
@@ -169,129 +199,234 @@
       font-size: 13px;
     }
 
-    .hidden { display: none !important; }
-
-    .muted {
-      color: var(--muted);
-      font-size: 13px;
+    .filters-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
     }
 
     .status {
-      margin-top: 10px;
-      padding: 9px 10px;
-      border-radius: 10px;
+      margin-top: 11px;
+      padding: 10px 11px;
+      border-radius: 11px;
       white-space: pre-wrap;
       font-size: 13px;
     }
 
     .status.ok {
-      color: #b7f7d2;
-      border: 1px solid #16865b;
-      background: #073b2c;
+      color: var(--green);
+      border: 1px solid #16845b;
+      background: #073a2b;
     }
 
     .status.err {
-      color: #ffd0d5;
-      border: 1px solid #b6344a;
-      background: #551724;
+      color: #ffd3d9;
+      border: 1px solid #b63b51;
+      background: #541826;
+    }
+
+    .lookup-panel {
+      margin-top: 12px;
+      padding: 13px;
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      background: rgba(4, 11, 28, 0.45);
+    }
+
+    .lookup-summary {
+      margin: 0;
+      color: #d7e2fb;
+      font-size: 13px;
+    }
+
+    .lookup-data {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 11px;
+    }
+
+    .lookup-item {
+      padding: 10px;
+      border: 1px solid rgba(84, 105, 157, 0.55);
+      border-radius: 10px;
+      background: rgba(13, 25, 54, 0.72);
+    }
+
+    .lookup-label {
+      display: block;
+      margin-bottom: 3px;
+      color: #c0ccea;
+      font-size: 12px;
+    }
+
+    .lookup-value {
+      color: #f5f7fb;
+      overflow-wrap: anywhere;
+    }
+
+    .ipa-display {
+      direction: ltr;
+      text-align: left;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 16px;
+    }
+
+    .resource-title {
+      margin-top: 14px;
+      color: #d8e4ff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .resources {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 8px;
+      margin-top: 9px;
+    }
+
+    .resource-link {
+      display: block;
+      min-height: 96px;
+      padding: 10px;
+      text-decoration: none;
+      border: 1px solid #3a4d7e;
+      border-radius: 12px;
+      background: #0b1733;
+    }
+
+    .resource-link:hover {
+      border-color: var(--gold-1);
+      background: #101e42;
+    }
+
+    .resource-rank {
+      color: var(--gold-1);
+      font-size: 12px;
+    }
+
+    .resource-name {
+      margin-top: 2px;
+      color: #f0f4ff;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .resource-note {
+      margin-top: 4px;
+      color: #aebbd6;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
     .list-heading {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      margin-top: 22px;
+      justify-content: space-between;
+      gap: 9px;
+      margin-top: 23px;
     }
 
-    .filters-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin: 4px 0 10px;
+    .search-input {
+      margin: 6px 0 10px;
     }
-
-    .search-input { margin: 4px 0 10px; }
 
     .entry {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
-      padding: 13px 0;
-      border-bottom: 1px solid rgba(62, 78, 120, .75);
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(61, 79, 126, 0.72);
     }
 
-    .entry:last-child { border-bottom: 0; }
+    .entry:last-child {
+      border-bottom: 0;
+    }
 
     .term-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       flex-wrap: wrap;
     }
 
-    .lang-badge {
+    .term {
+      color: #fff1bd;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .lang-badge,
+    .ipa-badge {
+      padding: 2px 7px;
+      border-radius: 7px;
       font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      border: 1px solid #3a4a75;
-      color: #cfd6e6;
-      background: #0f1a36;
+    }
+
+    .lang-badge {
+      border: 1px solid #3b4d7b;
+      color: #cdd8ef;
+      background: #0d1935;
     }
 
     .ipa-badge {
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      border: 1px solid #4a3a75;
-      color: #e6cfd6;
-      background: #1a0f36;
+      direction: ltr;
+      border: 1px solid #5a427b;
+      color: #f0d7e6;
+      background: #1a1038;
       font-family: "Courier New", Courier, monospace;
     }
 
-    .term {
-      color: #fff3c5;
-      font-size: 16px;
-    }
-
     .definition {
-      margin-top: 3px;
+      margin-top: 4px;
       color: var(--muted);
       overflow-wrap: anywhere;
     }
 
     .source {
       margin-top: 4px;
+      color: #a6b9e2;
       font-size: 12px;
-      color: #9fb0d6;
       overflow-wrap: anywhere;
     }
 
     .entry-actions {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-    }
-
-    .entry-actions button {
-      width: auto;
-      padding: 7px 9px;
-      font-size: 12px;
     }
 
     .empty {
-      padding: 16px 0 4px;
+      padding: 18px 0 5px;
       color: var(--muted);
       text-align: center;
     }
 
-    @media (max-width: 480px) {
-      .container { padding-inline: 12px; }
-      .card { padding: 15px; border-radius: 15px; }
-      .entry { grid-template-columns: 1fr; }
-      .entry-actions { justify-content: flex-start; }
-      h1 { font-size: 20px; }
-      .filters-row { grid-template-columns: 1fr; }
+    @media (max-width: 530px) {
+      .container {
+        padding-inline: 12px;
+      }
+
+      .card {
+        padding: 15px;
+        border-radius: 16px;
+      }
+
+      .filters-row {
+        grid-template-columns: 1fr;
+      }
+
+      .entry {
+        grid-template-columns: 1fr;
+      }
+
+      .entry-actions {
+        justify-content: flex-start;
+      }
+
+      .resources {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -300,19 +435,37 @@
   <main class="container">
     <header>
       <h1>واژه‌نامه‌ی تخصصی</h1>
+
       <div id="authBar" class="row hidden">
         <span id="userEmail" class="muted"></span>
-        <button id="btnLogout" class="secondary small-button" type="button">خروج</button>
+        <button id="btnLogout" class="secondary small-button" type="button">
+          خروج
+        </button>
       </div>
     </header>
 
     <section id="loginCard" class="card">
       <h2>ورود به واژه‌نامه</h2>
+
       <div class="column">
-        <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="ایمیل مشترک" />
-        <input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور" />
+        <input
+          id="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="ایمیل مشترک"
+        />
+
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="رمز عبور"
+        />
+
         <button id="btnLogin" type="button">ورود</button>
       </div>
+
       <div id="loginStatus" class="status hidden"></div>
     </section>
 
@@ -320,53 +473,83 @@
       <h2>افزودن واژه</h2>
 
       <div class="column">
-        <input id="wordOriginal" type="text" placeholder="واژه (word_original)" />
-        <input id="ipa" type="text" placeholder="تلفظ IPA (اختیاری)" />
-        <input id="persianEquivalent" type="text" placeholder="معادل فارسی/سره (اختیاری)" />
-        <textarea id="meaningOriginal" placeholder="معنی یا توضیح (meaning_original)"></textarea>
-        <input id="pronunciationSource" type="text" placeholder="منبع تلفظ/معنی (اختیاری)" />
+        <input
+          id="wordOriginal"
+          type="text"
+          autocomplete="off"
+          placeholder="واژه یا صورت اصلی واژه"
+        />
+
+        <input
+          id="ipa"
+          type="text"
+          dir="ltr"
+          autocomplete="off"
+          placeholder="تلفظ IPA (اختیاری)"
+        />
+
+        <input
+          id="persianEquivalent"
+          type="text"
+          autocomplete="off"
+          placeholder="معادل فارسی / سره (اختیاری)"
+        />
+
+        <textarea
+          id="meaningOriginal"
+          placeholder="معنی یا توضیح (اختیاری)"
+        ></textarea>
+
+        <input
+          id="pronunciationSource"
+          type="text"
+          autocomplete="off"
+          placeholder="منبع تلفظ و معنی (اختیاری)"
+        />
 
         <div class="filters-row">
-          <select id="languageId">
+          <select id="languageId" aria-label="زبان واژه">
             <option value="fa">فارسی (fa)</option>
             <option value="en">انگلیسی (en)</option>
             <option value="de">آلمانی (de)</option>
             <option value="fr">فرانسوی (fr)</option>
-            <option value="ar">عربی (ar)</option>
             <option value="tr">ترکی (tr)</option>
+            <option value="ar">عربی (ar)</option>
             <option value="he">عبری (he)</option>
-            <option value="el">یونانی (el)</option>
+            <option value="el">یونانی باستان (el)</option>
             <option value="la">لاتین (la)</option>
             <option value="akk">اکدی (akk)</option>
             <option value="sux">سومری (sux)</option>
             <option value="av">اوستایی (av)</option>
             <option value="syr">سریانی (syr)</option>
+            <option value="arc">آرامی (arc)</option>
             <option value="pal">پهلوی (pal)</option>
             <option value="peo">فارسی باستان (peo)</option>
           </select>
 
-          <select id="filterLanguageId">
+          <select id="filterLanguageId" aria-label="فیلتر زبان">
             <option value="">همه‌ی زبان‌ها</option>
             <option value="fa">فارسی (fa)</option>
             <option value="en">انگلیسی (en)</option>
             <option value="de">آلمانی (de)</option>
             <option value="fr">فرانسوی (fr)</option>
-            <option value="ar">عربی (ar)</option>
             <option value="tr">ترکی (tr)</option>
+            <option value="ar">عربی (ar)</option>
             <option value="he">عبری (he)</option>
-            <option value="el">یونانی (el)</option>
+            <option value="el">یونانی باستان (el)</option>
             <option value="la">لاتین (la)</option>
             <option value="akk">اکدی (akk)</option>
             <option value="sux">سومری (sux)</option>
             <option value="av">اوستایی (av)</option>
             <option value="syr">سریانی (syr)</option>
+            <option value="arc">آرامی (arc)</option>
             <option value="pal">پهلوی (pal)</option>
             <option value="peo">فارسی باستان (peo)</option>
           </select>
         </div>
 
         <button id="btnFetchAuto" class="secondary" type="button">
-          دریافت اطلاعات خودکار از منابع
+          دریافت IPA و اطلاعات از منابع
         </button>
 
         <button id="btnAdd" type="button">افزودن واژه</button>
@@ -374,16 +557,33 @@
 
       <div id="appStatus" class="status hidden"></div>
 
+      <section id="lookupPanel" class="lookup-panel hidden">
+        <h3>نتیجه‌ی جست‌وجوی منابع</h3>
+        <p id="lookupSummary" class="lookup-summary"></p>
+
+        <div id="lookupData" class="lookup-data"></div>
+
+        <div id="resourceTitle" class="resource-title hidden">
+          منابع پژوهشی و لینک جست‌وجوی واژه
+        </div>
+
+        <div id="resourcesList" class="resources"></div>
+      </section>
+
       <div class="list-heading">
-        <h2 style="margin:0;">واژه‌ها</h2>
-        <button id="btnSort" class="secondary small-button" type="button">مرتب‌سازی الفبایی</button>
+        <h2 style="margin: 0">واژه‌ها</h2>
+
+        <button id="btnSort" class="secondary small-button" type="button">
+          مرتب‌سازی الفبایی
+        </button>
       </div>
 
       <input
         id="searchInput"
         class="search-input"
         type="search"
-        placeholder="جست‌وجو در واژه، IPA، معنی، معادل فارسی، منبع…"
+        autocomplete="off"
+        placeholder="جست‌وجو در واژه، IPA، معنی، معادل فارسی و منبع…"
       />
 
       <div id="entriesList"></div>
@@ -394,7 +594,8 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     const SUPABASE_URL = "https://bmuwpcqqgxvoghxkaqch.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdXdwY3FxZ3h2b2doeGthcWNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDczMzYsImV4cCI6MjEwMjgyMzMzNn0.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdWIiOiJibXV3cGNxcWd4dm9naHhrYXFjaCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzg3MjQ3MzM2LCJleHAiOjIxMDI4MjMzMzZ9.N-XChiNbcBu3TgdF5S4snZlnyW45RegaAknG2J5EFfM";
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -402,11 +603,11 @@
     const appCard = document.getElementById("appCard");
     const authBar = document.getElementById("authBar");
     const userEmail = document.getElementById("userEmail");
-    const btnLogout = document.getElementById("btnLogout");
 
     const emailIn = document.getElementById("email");
-    const passIn = document.getElementById("password");
+    const passwordIn = document.getElementById("password");
     const btnLogin = document.getElementById("btnLogin");
+    const btnLogout = document.getElementById("btnLogout");
     const loginStatus = document.getElementById("loginStatus");
 
     const wordOriginalIn = document.getElementById("wordOriginal");
@@ -420,9 +621,15 @@
     const btnAdd = document.getElementById("btnAdd");
     const appStatus = document.getElementById("appStatus");
 
+    const lookupPanel = document.getElementById("lookupPanel");
+    const lookupSummary = document.getElementById("lookupSummary");
+    const lookupData = document.getElementById("lookupData");
+    const resourceTitle = document.getElementById("resourceTitle");
+    const resourcesList = document.getElementById("resourcesList");
+
     const searchInput = document.getElementById("searchInput");
-    const btnSort = document.getElementById("btnSort");
     const filterLanguageId = document.getElementById("filterLanguageId");
+    const btnSort = document.getElementById("btnSort");
     const entriesList = document.getElementById("entriesList");
 
     let currentUser = null;
@@ -435,13 +642,36 @@
       sourceUrl: "",
       sourceName: "",
       sourcesUsed: [],
-      extraSources: [],
+      resources: [],
     };
 
     function showStatus(element, message, isOk) {
       element.textContent = message;
       element.className = "status " + (isOk ? "ok" : "err");
-      window.setTimeout(() => element.classList.add("hidden"), 7000);
+      element.classList.remove("hidden");
+
+      window.clearTimeout(element._hideTimer);
+
+      element._hideTimer = window.setTimeout(() => {
+        element.classList.add("hidden");
+      }, 9000);
+    }
+
+    function clearStatus(element) {
+      window.clearTimeout(element._hideTimer);
+      element.classList.add("hidden");
+      element.textContent = "";
+    }
+
+    function setButtonLoading(button, loadingText) {
+      const oldText = button.textContent;
+      button.disabled = true;
+      button.textContent = loadingText;
+
+      return () => {
+        button.disabled = false;
+        button.textContent = oldText;
+      };
     }
 
     function resetAutoLookupData() {
@@ -451,8 +681,16 @@
         sourceUrl: "",
         sourceName: "",
         sourcesUsed: [],
-        extraSources: [],
+        resources: [],
       };
+    }
+
+    function clearLookupPanel() {
+      lookupPanel.classList.add("hidden");
+      lookupSummary.textContent = "";
+      lookupData.innerHTML = "";
+      resourcesList.innerHTML = "";
+      resourceTitle.classList.add("hidden");
     }
 
     function showLogin() {
@@ -460,6 +698,8 @@
       loginCard.classList.remove("hidden");
       appCard.classList.add("hidden");
       authBar.classList.add("hidden");
+      clearLookupPanel();
+      resetAutoLookupData();
     }
 
     function showApp() {
@@ -469,11 +709,124 @@
       userEmail.textContent = currentUser?.email || "";
     }
 
+    function addLookupItem(label, value, ipa = false) {
+      if (!value) return;
+
+      const box = document.createElement("div");
+      box.className = "lookup-item";
+
+      const labelEl = document.createElement("span");
+      labelEl.className = "lookup-label";
+      labelEl.textContent = label;
+
+      const valueEl = document.createElement("div");
+      valueEl.className = "lookup-value" + (ipa ? " ipa-display" : "");
+      valueEl.textContent = value;
+
+      box.appendChild(labelEl);
+      box.appendChild(valueEl);
+      lookupData.appendChild(box);
+    }
+
+    function renderResources(resources) {
+      resourcesList.innerHTML = "";
+
+      if (!Array.isArray(resources) || !resources.length) {
+        resourceTitle.classList.add("hidden");
+        return;
+      }
+
+      resourceTitle.classList.remove("hidden");
+
+      for (const resource of resources) {
+        const link = document.createElement("a");
+        link.className = "resource-link";
+        link.href = resource.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+
+        const rank = document.createElement("div");
+        rank.className = "resource-rank";
+        rank.textContent = "اولویت " + String(resource.rank || "—");
+
+        const name = document.createElement("div");
+        name.className = "resource-name";
+        name.textContent = resource.name || "منبع پژوهشی";
+
+        const note = document.createElement("div");
+        note.className = "resource-note";
+        note.textContent = resource.note || resource.category || "";
+
+        link.appendChild(rank);
+        link.appendChild(name);
+        link.appendChild(note);
+
+        resourcesList.appendChild(link);
+      }
+    }
+
+    function renderLookupResult(data) {
+      lookupPanel.classList.remove("hidden");
+      lookupData.innerHTML = "";
+
+      const languageName = data?.language_name
+        ? "زبان: " + data.language_name + "\n"
+        : "";
+
+      lookupSummary.textContent =
+        languageName +
+        (data?.message || "نتیجه‌ی جست‌وجو آماده است.");
+
+      if (data?.ipa) {
+        addLookupItem("IPA انتخاب‌شده", data.ipa, true);
+      }
+
+      if (Array.isArray(data?.ipa_candidates) && data.ipa_candidates.length > 1) {
+        addLookupItem(
+          "گزینه‌های دیگر IPA",
+          data.ipa_candidates.join(" / "),
+          true
+        );
+      }
+
+      if (data?.meaning) {
+        addLookupItem("معنی یا تعریف", data.meaning);
+      }
+
+      if (data?.etymology) {
+        addLookupItem("ریشه‌شناسی", data.etymology);
+      }
+
+      if (data?.audio_url) {
+        const audioBox = document.createElement("div");
+        audioBox.className = "lookup-item";
+
+        const audioLabel = document.createElement("span");
+        audioLabel.className = "lookup-label";
+        audioLabel.textContent = "فایل صوتی";
+
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.preload = "none";
+        audio.src = data.audio_url;
+
+        audioBox.appendChild(audioLabel);
+        audioBox.appendChild(audio);
+        lookupData.appendChild(audioBox);
+      }
+
+      if (data?.source) {
+        addLookupItem("منبع داده", data.source);
+      }
+
+      renderResources(data?.resources || []);
+    }
+
     async function refreshSession() {
       try {
         const { data, error } = await supabase.auth.getSession();
 
-        if (error || !data.session) {
+        if (error || !data?.session) {
           showLogin();
           return;
         }
@@ -481,7 +834,8 @@
         currentUser = data.session.user;
         showApp();
         await loadEntries();
-      } catch {
+      } catch (error) {
+        console.error("Session error:", error);
         showLogin();
       }
     }
@@ -496,7 +850,11 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        showStatus(appStatus, "خطا در بارگذاری واژه‌ها:\n" + error.message, false);
+        showStatus(
+          appStatus,
+          "خطا در بارگذاری واژه‌ها:\n" + error.message,
+          false
+        );
         return;
       }
 
@@ -505,46 +863,62 @@
     }
 
     function renderEntries() {
-      const query = (searchInput.value || "").trim().toLowerCase();
+      const query = (searchInput.value || "").trim().toLocaleLowerCase();
+      const languageFilter = (filterLanguageId.value || "").trim();
 
-      let filtered = allEntries;
+      let rows = [...allEntries];
+
+      if (languageFilter) {
+        rows = rows.filter(
+          (entry) => String(entry.language_id || "") === languageFilter
+        );
+      }
 
       if (query) {
-        filtered = filtered.filter(e => {
+        rows = rows.filter((entry) => {
           const fields = [
-            e.word_original,
-            e.ipa,
-            e.meaning_original,
-            e.persian_sereh_equivalent,
-            e.pronunciation_source,
+            entry.word_original,
+            entry.ipa,
+            entry.persian_sereh_equivalent,
+            entry.meaning_original,
+            entry.pronunciation_source,
+            entry.meaning_source,
+            entry.etymology_root,
+            entry.research_notes,
+            entry.language_id,
           ];
 
-          return fields.some(value =>
-            String(value || "").toLowerCase().includes(query)
+          return fields.some((field) =>
+            String(field || "").toLocaleLowerCase().includes(query)
           );
         });
       }
 
       if (alphabetical) {
-        filtered = [...filtered].sort((a, b) =>
-          (a.word_original || "").localeCompare(b.word_original || "", "fa")
+        rows.sort((a, b) =>
+          String(a.word_original || "").localeCompare(
+            String(b.word_original || ""),
+            "fa"
+          )
         );
       }
 
       entriesList.innerHTML = "";
 
-      if (!filtered.length) {
+      if (!rows.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent = query
-          ? "هیچ واژه‌ای با این جست‌وجو یافت نشد."
-          : "هنوز واژه‌ای اضافه نکرده‌اید.";
+        empty.textContent =
+          query || languageFilter
+            ? "هیچ واژه‌ای با این جست‌وجو یا فیلتر یافت نشد."
+            : "هنوز واژه‌ای اضافه نکرده‌اید.";
+
         entriesList.appendChild(empty);
         return;
       }
 
-      for (const e of filtered) {
-        const row = document.createElement("div");
+      for (const entry of rows) {
+        const row = document.createElement("article");
         row.className = "entry";
 
         const textCol = document.createElement("div");
@@ -552,89 +926,109 @@
         const termRow = document.createElement("div");
         termRow.className = "term-row";
 
-        const termEl = document.createElement("div");
-        termEl.className = "term";
-        termEl.textContent = e.word_original || "";
-        termRow.appendChild(termEl);
+        const langBadge = document.createElement("span");
+        langBadge.className = "lang-badge";
+        langBadge.textContent = entry.language_id || "?";
 
-        if (e.ipa) {
-          const ipaEl = document.createElement("span");
-          ipaEl.className = "ipa-badge";
-          ipaEl.textContent = e.ipa;
-          termRow.appendChild(ipaEl);
+        const term = document.createElement("div");
+        term.className = "term";
+        term.textContent = entry.word_original || "";
+
+        termRow.appendChild(langBadge);
+        termRow.appendChild(term);
+
+        if (entry.ipa) {
+          const ipa = document.createElement("span");
+          ipa.className = "ipa-badge";
+          ipa.textContent = entry.ipa;
+          termRow.appendChild(ipa);
         }
-
-        const defEl = document.createElement("div");
-        defEl.className = "definition";
-        defEl.textContent = e.meaning_original || "";
 
         textCol.appendChild(termRow);
-        textCol.appendChild(defEl);
 
-        if (e.persian_sereh_equivalent) {
-          const peEl = document.createElement("div");
-          peEl.className = "source";
-          peEl.textContent = "معادل فارسی: " + e.persian_sereh_equivalent;
-          textCol.appendChild(peEl);
+        if (entry.meaning_original) {
+          const definition = document.createElement("div");
+          definition.className = "definition";
+          definition.textContent = entry.meaning_original;
+          textCol.appendChild(definition);
         }
 
-        if (e.pronunciation_source) {
-          const psEl = document.createElement("div");
-          psEl.className = "source";
-          psEl.textContent = "منبع: " + e.pronunciation_source;
-          textCol.appendChild(psEl);
+        if (entry.persian_sereh_equivalent) {
+          const persian = document.createElement("div");
+          persian.className = "source";
+          persian.textContent =
+            "معادل فارسی: " + entry.persian_sereh_equivalent;
+          textCol.appendChild(persian);
         }
 
-        const actionsCol = document.createElement("div");
-        actionsCol.className = "entry-actions";
+        if (entry.pronunciation_source) {
+          const source = document.createElement("div");
+          source.className = "source";
+          source.textContent = "منبع: " + entry.pronunciation_source;
+          textCol.appendChild(source);
+        }
 
-        const btnDelete = document.createElement("button");
-        btnDelete.type = "button";
-        btnDelete.className = "danger small-button";
-        btnDelete.textContent = "حذف";
+        const actions = document.createElement("div");
+        actions.className = "entry-actions";
 
-        btnDelete.addEventListener("click", async () => {
-          if (!confirm(`آیا مطمئنید می‌خواهید «${e.word_original}» را حذف کنید؟`)) {
-            return;
-          }
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "danger small-button";
+        deleteButton.textContent = "حذف";
+
+        deleteButton.addEventListener("click", async () => {
+          const confirmed = window.confirm(
+            `آیا از حذف «${entry.word_original || ""}» مطمئنید؟`
+          );
+
+          if (!confirmed) return;
+
+          deleteButton.disabled = true;
 
           const { error } = await supabase
             .from("word_entries")
             .delete()
-            .eq("id", e.id)
+            .eq("id", entry.id)
             .eq("user_id", currentUser.id);
 
           if (error) {
-            showStatus(appStatus, "خطا در حذف واژه:\n" + error.message, false);
+            deleteButton.disabled = false;
+            showStatus(
+              appStatus,
+              "خطا در حذف واژه:\n" + error.message,
+              false
+            );
             return;
           }
 
-          allEntries = allEntries.filter(x => x.id !== e.id);
+          allEntries = allEntries.filter((item) => item.id !== entry.id);
           renderEntries();
           showStatus(appStatus, "واژه حذف شد.", true);
         });
 
-        actionsCol.appendChild(btnDelete);
+        actions.appendChild(deleteButton);
         row.appendChild(textCol);
-        row.appendChild(actionsCol);
+        row.appendChild(actions);
         entriesList.appendChild(row);
       }
     }
 
     btnLogin.addEventListener("click", async () => {
-      loginStatus.classList.add("hidden");
+      clearStatus(loginStatus);
 
       const email = emailIn.value.trim();
-      const password = passIn.value;
+      const password = passwordIn.value;
 
       if (!email || !password) {
-        showStatus(loginStatus, "لطفاً ایمیل و رمز عبور را وارد کنید.", false);
+        showStatus(
+          loginStatus,
+          "لطفاً ایمیل و رمز عبور را وارد کنید.",
+          false
+        );
         return;
       }
 
-      btnLogin.disabled = true;
-      const oldText = btnLogin.textContent;
-      btnLogin.textContent = "در حال ورود…";
+      const stopLoading = setButtonLoading(btnLogin, "در حال ورود…");
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -645,20 +1039,22 @@
         if (error) throw error;
 
         currentUser = data.user;
+        emailIn.value = "";
+        passwordIn.value = "";
+
         showApp();
         await loadEntries();
-
-        emailIn.value = "";
-        passIn.value = "";
       } catch (error) {
+        console.error("Login error:", error);
+
         showStatus(
           loginStatus,
-          "خطا در ورود:\n" + (error?.message || "ورود انجام نشد."),
+          "خطا در ورود:\n" +
+            (error?.message || "ورود انجام نشد."),
           false
         );
       } finally {
-        btnLogin.disabled = false;
-        btnLogin.textContent = oldText;
+        stopLoading();
       }
     });
 
@@ -668,7 +1064,7 @@
     });
 
     btnFetchAuto.addEventListener("click", async () => {
-      appStatus.classList.add("hidden");
+      clearStatus(appStatus);
 
       const word = wordOriginalIn.value.trim();
       const language = languageIdIn.value.trim();
@@ -676,99 +1072,96 @@
       if (!word) {
         showStatus(
           appStatus,
-          "ابتدا واژه را وارد کنید، سپس دکمه‌ی دریافت اطلاعات خودکار را بزنید.",
+          "ابتدا واژه را وارد کنید، سپس دکمه‌ی دریافت اطلاعات را بزنید.",
           false
         );
         return;
       }
 
-      const oldText = btnFetchAuto.textContent;
-      btnFetchAuto.disabled = true;
-      btnFetchAuto.textContent = "در حال جست‌وجو در منابع…";
+      resetAutoLookupData();
+      clearLookupPanel();
+
+      const stopLoading = setButtonLoading(
+        btnFetchAuto,
+        "در حال بررسی IPA و منابع…"
+      );
 
       try {
         const { data, error } = await supabase.functions.invoke(
           "fetch-word-data",
           {
-            body: {
-              word,
-              language,
-            },
+            body: { word, language },
           }
         );
 
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
 
-        if (!data?.found) {
-          resetAutoLookupData();
+        renderLookupResult(data);
 
-          const sourceLink = data?.source_url
-            ? "\nمنبع بررسی‌شده: " + data.source_url
-            : "";
-
-          showStatus(
-            appStatus,
-            (data?.message || "برای این واژه نتیجه‌ای پیدا نشد.") + sourceLink,
-            false
-          );
-          return;
-        }
-
-        if (data.ipa) {
+        if (data?.ipa) {
           ipaIn.value = data.ipa;
         }
 
-        if (data.meaning) {
+        if (data?.meaning) {
           meaningOriginalIn.value = data.meaning;
         }
 
-        const sourceName = data.source || "منبع خودکار";
-        const sourceUrl = data.source_url || "";
-        const sourceText = sourceUrl
-          ? `${sourceName} | ${sourceUrl}`
-          : sourceName;
+        const sourceName = data?.source || "";
+        const sourceUrl = data?.source_url || "";
 
-        pronunciationSourceIn.value = sourceText;
+        if (sourceName || sourceUrl) {
+          pronunciationSourceIn.value = sourceUrl
+            ? `${sourceName} | ${sourceUrl}`
+            : sourceName;
+        }
 
         autoLookupData = {
-          etymology: data.etymology || "",
-          audioUrl: data.audio_url || "",
+          etymology: data?.etymology || "",
+          audioUrl: data?.audio_url || "",
           sourceUrl,
           sourceName,
-          sourcesUsed: Array.isArray(data.sources_used)
+          sourcesUsed: Array.isArray(data?.sources_used)
             ? data.sources_used
-            : [sourceName],
-          extraSources: Array.isArray(data.extra_sources) ? data.extra_sources : [],
+            : [],
+          resources: Array.isArray(data?.resources) ? data.resources : [],
         };
 
-        const resultParts = [
-          "اطلاعات موجود از منبع دریافت و در فرم قرار گرفت.",
-          data.ipa ? "IPA پیدا شد." : "IPA در نتیجه‌ی منبع نبود.",
-          data.meaning ? "معنی/تعریف پیدا شد." : "معنی در نتیجه‌ی منبع نبود.",
-          data.audio_url ? "لینک صوتی هم پیدا شد." : "لینک صوتی پیدا نشد.",
-          "لطفاً اطلاعات را بررسی کنید و سپس «افزودن واژه» را بزنید.",
-        ];
+        if (data?.found) {
+          const resultLines = [
+            "جست‌وجو انجام شد.",
+            data.ipa
+              ? "IPA در فیلد تلفظ قرار گرفت."
+              : "IPA خودکار پیدا نشد؛ منابع پیشنهادی را بررسی کنید.",
+            data.meaning
+              ? "معنی در فرم قرار گرفت."
+              : "معنی قابل استخراج پیدا نشد.",
+            "اطلاعات را بررسی و سپس ذخیره کنید.",
+          ];
 
-        showStatus(appStatus, resultParts.join("\n"), true);
+          showStatus(appStatus, resultLines.join("\n"), true);
+        } else {
+          showStatus(
+            appStatus,
+            "داده‌ی قابل استخراج خودکار پیدا نشد؛ کارت‌های منابع پژوهشی پایین را باز کنید.",
+            false
+          );
+        }
       } catch (error) {
-        console.error("Automatic lookup error:", error);
+        console.error("Lookup error:", error);
 
         showStatus(
           appStatus,
-          "خطا در دریافت اطلاعات خودکار:\n" +
-            (error?.message || "اتصال به Edge Function برقرار نشد."),
+          "خطا در دریافت اطلاعات از منابع:\n" +
+            (error?.message || "Edge Function پاسخ نداد."),
           false
         );
       } finally {
-        btnFetchAuto.disabled = false;
-        btnFetchAuto.textContent = oldText;
+        stopLoading();
       }
     });
 
     btnAdd.addEventListener("click", async () => {
-      appStatus.classList.add("hidden");
+      clearStatus(appStatus);
 
       if (!currentUser) {
         showStatus(appStatus, "ابتدا وارد حساب کاربری شوید.", false);
@@ -780,35 +1173,43 @@
       const persian_sereh_equivalent = persianEquivalentIn.value.trim();
       const meaning_original = meaningOriginalIn.value.trim();
       const pronunciation_source = pronunciationSourceIn.value.trim();
+      const language_id = languageIdIn.value.trim();
 
       if (!word_original) {
-        showStatus(appStatus, "لطفاً حداقل «واژه» را وارد کنید.", false);
+        showStatus(appStatus, "لطفاً حداقل واژه را وارد کنید.", false);
         return;
       }
 
-      btnAdd.disabled = true;
-      const oldText = btnAdd.textContent;
-      btnAdd.textContent = "در حال ذخیره…";
+      const stopLoading = setButtonLoading(btnAdd, "در حال ذخیره…");
 
       try {
+        /*
+          فقط ستون‌هایی ارسال می‌شوند که در نسخه‌ی فعلی جدول شما
+          قطعی و امن هستند. این کار خطاهای ستون عددی با مقدار خالی
+          و خطاهای ساختار قدیمی جدول را جلوگیری می‌کند.
+        */
         const { data, error } = await supabase
           .from("word_entries")
           .insert({
             user_id: currentUser.id,
-            word_original: word_original,
+            word_original,
             ipa: ipa || null,
             persian_sereh_equivalent: persian_sereh_equivalent || null,
             meaning_original: meaning_original || null,
             pronunciation_source: pronunciation_source || null,
-            needs_review: false
+            language_id: language_id || null,
+            needs_review: false,
           })
           .select();
 
         if (error) throw error;
 
-        const [newEntry] = data || [];
+        const newEntry = Array.isArray(data) ? data[0] : null;
+
         if (newEntry) {
           allEntries.unshift(newEntry);
+        } else {
+          await loadEntries();
         }
 
         wordOriginalIn.value = "";
@@ -818,7 +1219,9 @@
         pronunciationSourceIn.value = "";
 
         resetAutoLookupData();
+        clearLookupPanel();
         renderEntries();
+
         showStatus(appStatus, "واژه با موفقیت ذخیره شد.", true);
       } catch (error) {
         console.error("Insert error:", error);
@@ -830,21 +1233,38 @@
           false
         );
       } finally {
-        btnAdd.disabled = false;
-        btnAdd.textContent = oldText;
+        stopLoading();
       }
     });
 
     btnSort.addEventListener("click", () => {
       alphabetical = !alphabetical;
+
       btnSort.textContent = alphabetical
         ? "نمایش بر اساس زمان"
         : "مرتب‌سازی الفبایی";
+
       renderEntries();
     });
 
     searchInput.addEventListener("input", renderEntries);
     filterLanguageId.addEventListener("change", renderEntries);
+
+    wordOriginalIn.addEventListener("input", () => {
+      resetAutoLookupData();
+      clearLookupPanel();
+    });
+
+    languageIdIn.addEventListener("change", () => {
+      resetAutoLookupData();
+      clearLookupPanel();
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        showLogin();
+      }
+    });
 
     refreshSession();
   </script>
