@@ -334,6 +334,15 @@
             <option value="fr">فرانسوی (fr)</option>
             <option value="ar">عربی (ar)</option>
             <option value="tr">ترکی (tr)</option>
+            <option value="he">عبری (he)</option>
+            <option value="el">یونانی (el)</option>
+            <option value="la">لاتین (la)</option>
+            <option value="akk">اکدی (akk)</option>
+            <option value="sux">سومری (sux)</option>
+            <option value="av">اوستایی (av)</option>
+            <option value="syr">سریانی (syr)</option>
+            <option value="pal">پهلوی (pal)</option>
+            <option value="peo">فارسی باستان (peo)</option>
           </select>
 
           <select id="filterLanguageId">
@@ -344,11 +353,20 @@
             <option value="fr">فرانسوی (fr)</option>
             <option value="ar">عربی (ar)</option>
             <option value="tr">ترکی (tr)</option>
+            <option value="he">عبری (he)</option>
+            <option value="el">یونانی (el)</option>
+            <option value="la">لاتین (la)</option>
+            <option value="akk">اکدی (akk)</option>
+            <option value="sux">سومری (sux)</option>
+            <option value="av">اوستایی (av)</option>
+            <option value="syr">سریانی (syr)</option>
+            <option value="pal">پهلوی (pal)</option>
+            <option value="peo">فارسی باستان (peo)</option>
           </select>
         </div>
 
         <button id="btnFetchAuto" class="secondary" type="button">
-          دریافت اطلاعات خودکار از Wiktionary
+          دریافت اطلاعات خودکار از منابع
         </button>
 
         <button id="btnAdd" type="button">افزودن واژه</button>
@@ -411,10 +429,30 @@
     let allEntries = [];
     let alphabetical = false;
 
+    let autoLookupData = {
+      etymology: "",
+      audioUrl: "",
+      sourceUrl: "",
+      sourceName: "",
+      sourcesUsed: [],
+      extraSources: [],
+    };
+
     function showStatus(element, message, isOk) {
       element.textContent = message;
       element.className = "status " + (isOk ? "ok" : "err");
       window.setTimeout(() => element.classList.add("hidden"), 7000);
+    }
+
+    function resetAutoLookupData() {
+      autoLookupData = {
+        etymology: "",
+        audioUrl: "",
+        sourceUrl: "",
+        sourceName: "",
+        sourcesUsed: [],
+        extraSources: [],
+      };
     }
 
     function showLogin() {
@@ -629,23 +667,106 @@
       showLogin();
     });
 
-    /*
-      این دکمه فعلاً فقط اطلاع‌رسانی می‌کند تا ذخیره‌سازی پایدار بماند.
-      بعد از حل قطعی ساختار جدول، اتصال Edge Function را دوباره اضافه می‌کنیم.
-    */
-    btnFetchAuto.addEventListener("click", () => {
-      showStatus(
-        appStatus,
-        "دریافت خودکار موقتاً در حال بازبینی است. فعلاً اطلاعات را دستی وارد و ذخیره کنید.",
-        false
-      );
+    btnFetchAuto.addEventListener("click", async () => {
+      appStatus.classList.add("hidden");
+
+      const word = wordOriginalIn.value.trim();
+      const language = languageIdIn.value.trim();
+
+      if (!word) {
+        showStatus(
+          appStatus,
+          "ابتدا واژه را وارد کنید، سپس دکمه‌ی دریافت اطلاعات خودکار را بزنید.",
+          false
+        );
+        return;
+      }
+
+      const oldText = btnFetchAuto.textContent;
+      btnFetchAuto.disabled = true;
+      btnFetchAuto.textContent = "در حال جست‌وجو در منابع…";
+
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          "fetch-word-data",
+          {
+            body: {
+              word,
+              language,
+            },
+          }
+        );
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data?.found) {
+          resetAutoLookupData();
+
+          const sourceLink = data?.source_url
+            ? "\nمنبع بررسی‌شده: " + data.source_url
+            : "";
+
+          showStatus(
+            appStatus,
+            (data?.message || "برای این واژه نتیجه‌ای پیدا نشد.") + sourceLink,
+            false
+          );
+          return;
+        }
+
+        if (data.ipa) {
+          ipaIn.value = data.ipa;
+        }
+
+        if (data.meaning) {
+          meaningOriginalIn.value = data.meaning;
+        }
+
+        const sourceName = data.source || "منبع خودکار";
+        const sourceUrl = data.source_url || "";
+        const sourceText = sourceUrl
+          ? `${sourceName} | ${sourceUrl}`
+          : sourceName;
+
+        pronunciationSourceIn.value = sourceText;
+
+        autoLookupData = {
+          etymology: data.etymology || "",
+          audioUrl: data.audio_url || "",
+          sourceUrl,
+          sourceName,
+          sourcesUsed: Array.isArray(data.sources_used)
+            ? data.sources_used
+            : [sourceName],
+          extraSources: Array.isArray(data.extra_sources) ? data.extra_sources : [],
+        };
+
+        const resultParts = [
+          "اطلاعات موجود از منبع دریافت و در فرم قرار گرفت.",
+          data.ipa ? "IPA پیدا شد." : "IPA در نتیجه‌ی منبع نبود.",
+          data.meaning ? "معنی/تعریف پیدا شد." : "معنی در نتیجه‌ی منبع نبود.",
+          data.audio_url ? "لینک صوتی هم پیدا شد." : "لینک صوتی پیدا نشد.",
+          "لطفاً اطلاعات را بررسی کنید و سپس «افزودن واژه» را بزنید.",
+        ];
+
+        showStatus(appStatus, resultParts.join("\n"), true);
+      } catch (error) {
+        console.error("Automatic lookup error:", error);
+
+        showStatus(
+          appStatus,
+          "خطا در دریافت اطلاعات خودکار:\n" +
+            (error?.message || "اتصال به Edge Function برقرار نشد."),
+          false
+        );
+      } finally {
+        btnFetchAuto.disabled = false;
+        btnFetchAuto.textContent = oldText;
+      }
     });
 
-    /*
-      ذخیره‌سازی حداقلی:
-      فقط فیلدهای متنی موردنیاز و Boolean ارسال می‌شوند.
-      هیچ مقدار خالی یا متنی به ستون‌های عددی ارسال نمی‌شود.
-    */
     btnAdd.addEventListener("click", async () => {
       appStatus.classList.add("hidden");
 
@@ -696,6 +817,7 @@
         meaningOriginalIn.value = "";
         pronunciationSourceIn.value = "";
 
+        resetAutoLookupData();
         renderEntries();
         showStatus(appStatus, "واژه با موفقیت ذخیره شد.", true);
       } catch (error) {
