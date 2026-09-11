@@ -411,28 +411,10 @@
     let allEntries = [];
     let alphabetical = false;
 
-    let autoLookupData = {
-      etymology: "",
-      audioUrl: "",
-      sourceUrl: "",
-      sourceName: "",
-      sourcesUsed: [],
-    };
-
     function showStatus(element, message, isOk) {
       element.textContent = message;
       element.className = "status " + (isOk ? "ok" : "err");
       window.setTimeout(() => element.classList.add("hidden"), 7000);
-    }
-
-    function resetAutoLookupData() {
-      autoLookupData = {
-        etymology: "",
-        audioUrl: "",
-        sourceUrl: "",
-        sourceName: "",
-        sourcesUsed: [],
-      };
     }
 
     function showLogin() {
@@ -461,8 +443,7 @@
         currentUser = data.session.user;
         showApp();
         await loadEntries();
-      } catch (error) {
-        console.error("refreshSession error:", error);
+      } catch {
         showLogin();
       }
     }
@@ -488,17 +469,7 @@
     function renderEntries() {
       const query = (searchInput.value || "").trim().toLowerCase();
 
-      /*
-        language_id در دیتابیس فعلاً ممکن است عددی باشد؛
-        پس فیلتر زبان تا زمان مشخص‌شدن جدول languages انجام نمی‌شود.
-      */
-      const fLang = "";
-
       let filtered = allEntries;
-
-      if (fLang) {
-        filtered = filtered.filter(e => String(e.language_id || "") === fLang);
-      }
 
       if (query) {
         filtered = filtered.filter(e => {
@@ -508,8 +479,6 @@
             e.meaning_original,
             e.persian_sereh_equivalent,
             e.pronunciation_source,
-            e.meaning_source,
-            e.etymology_root,
           ];
 
           return fields.some(value =>
@@ -548,7 +517,6 @@
         const termEl = document.createElement("div");
         termEl.className = "term";
         termEl.textContent = e.word_original || "";
-
         termRow.appendChild(termEl);
 
         if (e.ipa) {
@@ -575,15 +543,8 @@
         if (e.pronunciation_source) {
           const psEl = document.createElement("div");
           psEl.className = "source";
-          psEl.textContent = "منبع تلفظ: " + e.pronunciation_source;
+          psEl.textContent = "منبع: " + e.pronunciation_source;
           textCol.appendChild(psEl);
-        }
-
-        if (e.meaning_source) {
-          const msEl = document.createElement("div");
-          msEl.className = "source";
-          msEl.textContent = "منبع داده: " + e.meaning_source;
-          textCol.appendChild(msEl);
         }
 
         const actionsCol = document.createElement("div");
@@ -633,8 +594,8 @@
         return;
       }
 
-      const oldText = btnLogin.textContent;
       btnLogin.disabled = true;
+      const oldText = btnLogin.textContent;
       btnLogin.textContent = "در حال ورود…";
 
       try {
@@ -665,86 +626,26 @@
 
     btnLogout.addEventListener("click", async () => {
       await supabase.auth.signOut();
-      resetAutoLookupData();
       showLogin();
     });
 
-    btnFetchAuto.addEventListener("click", async () => {
-      appStatus.classList.add("hidden");
-
-      const word = wordOriginalIn.value.trim();
-      const language = languageIdIn.value.trim();
-
-      if (!word) {
-        showStatus(
-          appStatus,
-          "ابتدا واژه را وارد کنید، سپس دکمه‌ی دریافت اطلاعات خودکار را بزنید.",
-          false
-        );
-        return;
-      }
-
-      const oldText = btnFetchAuto.textContent;
-      btnFetchAuto.disabled = true;
-      btnFetchAuto.textContent = "در حال جست‌وجو در منابع…";
-
-      try {
-        const { data, error } = await supabase.functions.invoke(
-          "fetch-word-data",
-          { body: { word, language } }
-        );
-
-        if (error) throw error;
-
-        if (!data?.found) {
-          resetAutoLookupData();
-
-          showStatus(
-            appStatus,
-            data?.message || "برای این واژه نتیجه‌ای پیدا نشد.",
-            false
-          );
-          return;
-        }
-
-        if (data.ipa) ipaIn.value = data.ipa;
-        if (data.meaning) meaningOriginalIn.value = data.meaning;
-
-        const sourceName = data.source || "Wiktionary";
-        const sourceUrl = data.source_url || "";
-
-        pronunciationSourceIn.value = sourceUrl
-          ? `${sourceName} | ${sourceUrl}`
-          : sourceName;
-
-        autoLookupData = {
-          etymology: data.etymology || "",
-          audioUrl: data.audio_url || "",
-          sourceUrl,
-          sourceName,
-          sourcesUsed: Array.isArray(data.sources_used)
-            ? data.sources_used
-            : [sourceName],
-        };
-
-        showStatus(
-          appStatus,
-          "اطلاعات موجود از منبع دریافت شد. آن‌ها را بررسی کنید، سپس «افزودن واژه» را بزنید.",
-          true
-        );
-      } catch (error) {
-        showStatus(
-          appStatus,
-          "خطا در دریافت اطلاعات خودکار:\n" +
-            (error?.message || "اتصال به Edge Function برقرار نشد."),
-          false
-        );
-      } finally {
-        btnFetchAuto.disabled = false;
-        btnFetchAuto.textContent = oldText;
-      }
+    /*
+      این دکمه فعلاً فقط اطلاع‌رسانی می‌کند تا ذخیره‌سازی پایدار بماند.
+      بعد از حل قطعی ساختار جدول، اتصال Edge Function را دوباره اضافه می‌کنیم.
+    */
+    btnFetchAuto.addEventListener("click", () => {
+      showStatus(
+        appStatus,
+        "دریافت خودکار موقتاً در حال بازبینی است. فعلاً اطلاعات را دستی وارد و ذخیره کنید.",
+        false
+      );
     });
 
+    /*
+      ذخیره‌سازی حداقلی:
+      فقط فیلدهای متنی موردنیاز و Boolean ارسال می‌شوند.
+      هیچ مقدار خالی یا متنی به ستون‌های عددی ارسال نمی‌شود.
+    */
     btnAdd.addEventListener("click", async () => {
       appStatus.classList.add("hidden");
 
@@ -764,8 +665,8 @@
         return;
       }
 
-      const oldText = btnAdd.textContent;
       btnAdd.disabled = true;
+      const oldText = btnAdd.textContent;
       btnAdd.textContent = "در حال ذخیره…";
 
       try {
@@ -773,59 +674,33 @@
           .from("word_entries")
           .insert({
             user_id: currentUser.id,
-            word_original,
+            word_original: word_original,
             ipa: ipa || null,
             persian_sereh_equivalent: persian_sereh_equivalent || null,
             meaning_original: meaning_original || null,
             pronunciation_source: pronunciation_source || null,
-
-            /*
-              موقتاً null:
-              چون language_id احتمالاً integer یا foreign key است،
-              در حالی که اپ مقدارهای متنی fa/en ارسال می‌کرد.
-            */
-            language_id: null,
-
-            transliteration: null,
-            pronunciation_link: autoLookupData.sourceUrl || null,
-            pronunciation_tradition: null,
-            audio_file_url: autoLookupData.audioUrl || null,
-            etymology_root: autoLookupData.etymology || null,
-            meaning_source: autoLookupData.sourceName || null,
-            textual_example: null,
-
-            /*
-              اصلاح اصلی:
-              این ستون integer است؛ بنابراین 1 یا null دریافت می‌کند.
-            */
-            credibility_level: autoLookupData.sourceName ? 1 : null,
-
-            persian_sereh_source: null,
-            persian_sereh_status: null,
-            research_notes: autoLookupData.sourcesUsed.length
-              ? "دریافت خودکار از: " + autoLookupData.sourcesUsed.join(", ")
-              : null,
-            conflicting_sources: null,
-            needs_review: false,
-            time_period: null,
+            needs_review: false
           })
           .select();
 
         if (error) throw error;
 
         const [newEntry] = data || [];
-        if (newEntry) allEntries.unshift(newEntry);
+        if (newEntry) {
+          allEntries.unshift(newEntry);
+        }
 
         wordOriginalIn.value = "";
         ipaIn.value = "";
         persianEquivalentIn.value = "";
         meaningOriginalIn.value = "";
         pronunciationSourceIn.value = "";
-        resetAutoLookupData();
 
         renderEntries();
         showStatus(appStatus, "واژه با موفقیت ذخیره شد.", true);
       } catch (error) {
+        console.error("Insert error:", error);
+
         showStatus(
           appStatus,
           "خطا در افزودن واژه:\n" +
