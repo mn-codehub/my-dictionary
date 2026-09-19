@@ -317,6 +317,41 @@
       line-height: 1.45;
     }
 
+    .save-options {
+      margin-top: 4px;
+      padding: 12px;
+      border: 1px solid var(--border-soft);
+      border-radius: 13px;
+      background: rgba(4, 11, 28, 0.55);
+    }
+
+    .save-options-title {
+      margin-bottom: 8px;
+      color: #dbe6ff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .save-option {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 34px;
+      color: #dce5f8;
+      font-size: 13px;
+    }
+
+    .save-option input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--gold-2);
+    }
+
+    .save-option.is-disabled {
+      color: #6f7d9c;
+    }
+
     .list-heading {
       display: flex;
       align-items: center;
@@ -524,6 +559,32 @@
           دریافت IPA و اطلاعات از منابع
         </button>
 
+        <div id="saveOptions" class="save-options hidden">
+          <div class="save-options-title">
+            مواردی که هنگام ذخیره نگه داشته شوند
+          </div>
+
+          <label id="saveIpaRow" class="save-option">
+            <input id="saveIpa" type="checkbox" checked />
+            <span>IPA</span>
+          </label>
+
+          <label id="saveMeaningRow" class="save-option">
+            <input id="saveMeaning" type="checkbox" checked />
+            <span>معنی / توضیح</span>
+          </label>
+
+          <label id="savePersianRow" class="save-option">
+            <input id="savePersian" type="checkbox" checked />
+            <span>معادل فارسی / سره</span>
+          </label>
+
+          <label id="saveSourceRow" class="save-option">
+            <input id="saveSource" type="checkbox" checked />
+            <span>منبع اصلی استخراج داده</span>
+          </label>
+        </div>
+
         <button id="btnAdd" type="button">افزودن واژه</button>
       </div>
 
@@ -602,6 +663,17 @@
     const resourceTitle = document.getElementById("resourceTitle");
     const resourcesList = document.getElementById("resourcesList");
 
+    const saveOptions = document.getElementById("saveOptions");
+    const saveIpa = document.getElementById("saveIpa");
+    const saveMeaning = document.getElementById("saveMeaning");
+    const savePersian = document.getElementById("savePersian");
+    const saveSource = document.getElementById("saveSource");
+
+    const saveIpaRow = document.getElementById("saveIpaRow");
+    const saveMeaningRow = document.getElementById("saveMeaningRow");
+    const savePersianRow = document.getElementById("savePersianRow");
+    const saveSourceRow = document.getElementById("saveSourceRow");
+
     const searchInput = document.getElementById("searchInput");
     const btnSort = document.getElementById("btnSort");
     const entriesList = document.getElementById("entriesList");
@@ -639,12 +711,55 @@
       };
     }
 
+    function setSaveOptionState(row, checkbox, hasValue) {
+      checkbox.checked = Boolean(hasValue);
+      checkbox.disabled = !hasValue;
+      row.classList.toggle("is-disabled", !hasValue);
+    }
+
+    function updateSaveOptions() {
+      const hasIpa = Boolean(ipaIn.value.trim());
+      const hasMeaning = Boolean(meaningOriginalIn.value.trim());
+      const hasPersian = Boolean(persianEquivalentIn.value.trim());
+      const hasSource = Boolean(pronunciationSourceIn.value.trim());
+
+      setSaveOptionState(saveIpaRow, saveIpa, hasIpa);
+      setSaveOptionState(saveMeaningRow, saveMeaning, hasMeaning);
+      setSaveOptionState(savePersianRow, savePersian, hasPersian);
+      setSaveOptionState(saveSourceRow, saveSource, hasSource);
+
+      saveOptions.classList.toggle(
+        "hidden",
+        !hasIpa && !hasMeaning && !hasPersian && !hasSource
+      );
+    }
+
+    function clearSaveOptions() {
+      saveOptions.classList.add("hidden");
+
+      saveIpa.checked = false;
+      saveMeaning.checked = false;
+      savePersian.checked = false;
+      saveSource.checked = false;
+
+      saveIpa.disabled = false;
+      saveMeaning.disabled = false;
+      savePersian.disabled = false;
+      saveSource.disabled = false;
+
+      saveIpaRow.classList.remove("is-disabled");
+      saveMeaningRow.classList.remove("is-disabled");
+      savePersianRow.classList.remove("is-disabled");
+      saveSourceRow.classList.remove("is-disabled");
+    }
+
     function clearLookupPanel() {
       lookupPanel.classList.add("hidden");
       lookupSummary.textContent = "";
       lookupData.innerHTML = "";
       resourcesList.innerHTML = "";
       resourceTitle.classList.add("hidden");
+      clearSaveOptions();
     }
 
     function showLogin() {
@@ -776,6 +891,7 @@
       }
 
       renderResources(data?.resources || []);
+      updateSaveOptions();
     }
 
     async function refreshSession() {
@@ -1060,6 +1176,8 @@
             : sourceName;
         }
 
+        updateSaveOptions();
+
         if (data?.found) {
           const resultLines = [
             "جست‌وجو انجام شد.",
@@ -1069,7 +1187,7 @@
             data.meaning
               ? "معنی در فرم قرار گرفت."
               : "معنی قابل استخراج پیدا نشد.",
-            "اطلاعات را بررسی و سپس ذخیره کنید.",
+            "موارد ذخیره را انتخاب و سپس واژه را ذخیره کنید.",
           ];
 
           showStatus(appStatus, resultLines.join("\n"), true);
@@ -1103,10 +1221,22 @@
       }
 
       const word_original = wordOriginalIn.value.trim();
-      const ipa = ipaIn.value.trim();
-      const persian_sereh_equivalent = persianEquivalentIn.value.trim();
-      const meaning_original = meaningOriginalIn.value.trim();
-      const pronunciation_source = pronunciationSourceIn.value.trim();
+
+      const selectedIpa = saveIpa.checked
+        ? ipaIn.value.trim()
+        : "";
+
+      const selectedMeaning = saveMeaning.checked
+        ? meaningOriginalIn.value.trim()
+        : "";
+
+      const selectedPersian = savePersian.checked
+        ? persianEquivalentIn.value.trim()
+        : "";
+
+      const selectedSource = saveSource.checked
+        ? pronunciationSourceIn.value.trim()
+        : "";
 
       if (!word_original) {
         showStatus(appStatus, "لطفاً حداقل واژه را وارد کنید.", false);
@@ -1117,19 +1247,18 @@
 
       try {
         /*
-          مهم:
-          language_id ارسال نمی‌شود، چون در جدول شما INTEGER است.
-          کدهای زبانی مثل fa، en، he و… نباید به ستون عددی فرستاده شوند.
+          language_id عمداً ارسال نمی‌شود؛
+          چون ستون language_id در جدول شما INTEGER است.
         */
         const { data, error } = await supabase
           .from("word_entries")
           .insert({
             user_id: currentUser.id,
             word_original,
-            ipa: ipa || null,
-            persian_sereh_equivalent: persian_sereh_equivalent || null,
-            meaning_original: meaning_original || null,
-            pronunciation_source: pronunciation_source || null,
+            ipa: selectedIpa || null,
+            persian_sereh_equivalent: selectedPersian || null,
+            meaning_original: selectedMeaning || null,
+            pronunciation_source: selectedSource || null,
             needs_review: false,
           })
           .select();
@@ -1155,7 +1284,11 @@
         clearLookupPanel();
         renderEntries();
 
-        showStatus(appStatus, "واژه با موفقیت ذخیره شد.", true);
+        showStatus(
+          appStatus,
+          "واژه با گزینه‌های انتخاب‌شده ذخیره شد.",
+          true
+        );
       } catch (error) {
         console.error("Insert error:", error);
 
@@ -1182,8 +1315,18 @@
 
     searchInput.addEventListener("input", renderEntries);
 
-    wordOriginalIn.addEventListener("input", clearLookupPanel);
-    languageIdIn.addEventListener("change", clearLookupPanel);
+    wordOriginalIn.addEventListener("input", () => {
+      clearLookupPanel();
+    });
+
+    languageIdIn.addEventListener("change", () => {
+      clearLookupPanel();
+    });
+
+    ipaIn.addEventListener("input", updateSaveOptions);
+    meaningOriginalIn.addEventListener("input", updateSaveOptions);
+    persianEquivalentIn.addEventListener("input", updateSaveOptions);
+    pronunciationSourceIn.addEventListener("input", updateSaveOptions);
 
     supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
