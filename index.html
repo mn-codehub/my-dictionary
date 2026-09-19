@@ -286,11 +286,11 @@
       display: block;
       min-height: 96px;
       padding: 10px;
+      color: inherit;
       text-decoration: none;
       border: 1px solid #3a4d7e;
       border-radius: 12px;
       background: #0b1733;
-      color: inherit;
     }
 
     .resource-link:hover {
@@ -354,25 +354,15 @@
       overflow-wrap: anywhere;
     }
 
-    .lang-badge,
     .ipa-badge {
       padding: 2px 7px;
-      border-radius: 7px;
-      font-size: 11px;
-    }
-
-    .lang-badge {
-      border: 1px solid #3b4d7b;
-      color: #cdd8ef;
-      background: #0d1935;
-    }
-
-    .ipa-badge {
       direction: ltr;
       border: 1px solid #5a427b;
+      border-radius: 7px;
       color: #f0d7e6;
       background: #1a1038;
       font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
     }
 
     .definition {
@@ -506,7 +496,7 @@
         />
 
         <div class="filters-row">
-          <select id="languageId" aria-label="زبان واژه">
+          <select id="languageId" aria-label="زبان جست‌وجوی واژه">
             <option value="fa">فارسی (fa)</option>
             <option value="en">انگلیسی (en)</option>
             <option value="de">آلمانی (de)</option>
@@ -526,23 +516,7 @@
           </select>
 
           <select id="filterLanguageId" aria-label="فیلتر زبان">
-            <option value="">همه‌ی زبان‌ها</option>
-            <option value="fa">فارسی (fa)</option>
-            <option value="en">انگلیسی (en)</option>
-            <option value="de">آلمانی (de)</option>
-            <option value="fr">فرانسوی (fr)</option>
-            <option value="tr">ترکی (tr)</option>
-            <option value="ar">عربی (ar)</option>
-            <option value="he">عبری (he)</option>
-            <option value="el">یونانی باستان (el)</option>
-            <option value="la">لاتین (la)</option>
-            <option value="akk">اکدی (akk)</option>
-            <option value="sux">سومری (sux)</option>
-            <option value="av">اوستایی (av)</option>
-            <option value="syr">سریانی (syr)</option>
-            <option value="arc">آرامی (arc)</option>
-            <option value="pal">پهلوی (pal)</option>
-            <option value="peo">فارسی باستان (peo)</option>
+            <option value="">فیلتر زبان فعلاً غیرفعال است</option>
           </select>
         </div>
 
@@ -629,7 +603,6 @@
     const resourcesList = document.getElementById("resourcesList");
 
     const searchInput = document.getElementById("searchInput");
-    const filterLanguageId = document.getElementById("filterLanguageId");
     const btnSort = document.getElementById("btnSort");
     const entriesList = document.getElementById("entriesList");
 
@@ -761,7 +734,10 @@
         addLookupItem("IPA انتخاب‌شده", data.ipa, true);
       }
 
-      if (Array.isArray(data?.ipa_candidates) && data.ipa_candidates.length > 1) {
+      if (
+        Array.isArray(data?.ipa_candidates) &&
+        data.ipa_candidates.length > 1
+      ) {
         addLookupItem(
           "گزینه‌های دیگر IPA",
           data.ipa_candidates.join(" / "),
@@ -843,16 +819,11 @@
     }
 
     function renderEntries() {
-      const query = (searchInput.value || "").trim().toLocaleLowerCase();
-      const languageFilter = (filterLanguageId.value || "").trim();
+      const query = (searchInput.value || "")
+        .trim()
+        .toLocaleLowerCase();
 
       let rows = [...allEntries];
-
-      if (languageFilter) {
-        rows = rows.filter(
-          (entry) => String(entry.language_id || "") === languageFilter
-        );
-      }
 
       if (query) {
         rows = rows.filter((entry) => {
@@ -862,7 +833,6 @@
             entry.persian_sereh_equivalent,
             entry.meaning_original,
             entry.pronunciation_source,
-            entry.language_id,
           ];
 
           return fields.some((field) =>
@@ -885,10 +855,9 @@
       if (!rows.length) {
         const empty = document.createElement("div");
         empty.className = "empty";
-        empty.textContent =
-          query || languageFilter
-            ? "هیچ واژه‌ای با این جست‌وجو یا فیلتر یافت نشد."
-            : "هنوز واژه‌ای اضافه نکرده‌اید.";
+        empty.textContent = query
+          ? "هیچ واژه‌ای با این جست‌وجو یافت نشد."
+          : "هنوز واژه‌ای اضافه نکرده‌اید.";
 
         entriesList.appendChild(empty);
         return;
@@ -903,15 +872,10 @@
         const termRow = document.createElement("div");
         termRow.className = "term-row";
 
-        const langBadge = document.createElement("span");
-        langBadge.className = "lang-badge";
-        langBadge.textContent = entry.language_id || "?";
-
         const term = document.createElement("div");
         term.className = "term";
         term.textContent = entry.word_original || "";
 
-        termRow.appendChild(langBadge);
         termRow.appendChild(term);
 
         if (entry.ipa) {
@@ -970,6 +934,7 @@
 
           if (error) {
             deleteButton.disabled = false;
+
             showStatus(
               appStatus,
               "خطا در حذف واژه:\n" + error.message,
@@ -1013,7 +978,9 @@
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         currentUser = data.user;
         emailIn.value = "";
@@ -1070,7 +1037,9 @@
           }
         );
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         renderLookupResult(data);
 
@@ -1138,7 +1107,6 @@
       const persian_sereh_equivalent = persianEquivalentIn.value.trim();
       const meaning_original = meaningOriginalIn.value.trim();
       const pronunciation_source = pronunciationSourceIn.value.trim();
-      const language_id = languageIdIn.value.trim();
 
       if (!word_original) {
         showStatus(appStatus, "لطفاً حداقل واژه را وارد کنید.", false);
@@ -1148,6 +1116,11 @@
       const stopLoading = setButtonLoading(btnAdd, "در حال ذخیره…");
 
       try {
+        /*
+          مهم:
+          language_id ارسال نمی‌شود، چون در جدول شما INTEGER است.
+          کدهای زبانی مثل fa، en، he و… نباید به ستون عددی فرستاده شوند.
+        */
         const { data, error } = await supabase
           .from("word_entries")
           .insert({
@@ -1157,12 +1130,13 @@
             persian_sereh_equivalent: persian_sereh_equivalent || null,
             meaning_original: meaning_original || null,
             pronunciation_source: pronunciation_source || null,
-            language_id: language_id || null,
             needs_review: false,
           })
           .select();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         const newEntry = Array.isArray(data) ? data[0] : null;
 
@@ -1207,7 +1181,6 @@
     });
 
     searchInput.addEventListener("input", renderEntries);
-    filterLanguageId.addEventListener("change", renderEntries);
 
     wordOriginalIn.addEventListener("input", clearLookupPanel);
     languageIdIn.addEventListener("change", clearLookupPanel);
